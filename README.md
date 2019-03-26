@@ -6,7 +6,7 @@ GoogleDriveAPIを使って、documentとspreadsheetsを一覧表示する。
 
 通常のwebページに加えて、chromeの拡張ページ内でも使う事が出来る。chromeの拡張ページはURLがchrome-extension:// で始まるが、GoogleAPIで認証後のコールバックにはhttp もしくはhttpsで始まるURLしか指定出来ないので別の仕組みが必要。
 
-![プレビュー](http://i.imgur.com/xxxx.png )
+![プレビュー](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-03-27-03-21-41.png)
 
 # git cloneした後に実行出来るコマンド一覧
 
