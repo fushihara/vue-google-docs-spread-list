@@ -22,9 +22,18 @@
         <option value="title">タイトル</option>
       </select>
     </div>
+    <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
+      <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">絞り込み検索</div>
+      <input
+        type="search"
+        style="flex:1 1 0;"
+        v-model="filter_keyword"
+        placeholder="絞り込みキーワード"
+      >
+    </div>
     <ul v-if="auth_status == '認証情報あり'" style="flex:1 1 0;margin-top:0;overflow-y:scroll;">
       <li
-        v-for="item in google_drive_api_result.files"
+        v-for="item in filterd_list"
         :key="item.id"
         style="display:flex;border-bottom:solid 1px silver;"
       >
@@ -164,12 +173,25 @@ export default Vue.extend({
       sort_model: "last_view_me",
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
-      loading_message_show: false
+      loading_message_show: false,
+      filter_keyword: ""
     };
   },
   computed: {
     disable_reload_select_ui: function () {
       return this.loading_message_show;
+    },
+    filterd_list: function () {
+      const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
+      if (keywords.length == 0) {
+        return this.google_drive_api_result.files;
+      }
+      return this.google_drive_api_result.files.filter(a => {
+        const name = a.name.toLowerCase();
+        return keywords.find(keyword => {
+          return name.includes(keyword);
+        });
+      });
     }
   },
   methods: {
