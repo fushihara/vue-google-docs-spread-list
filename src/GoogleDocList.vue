@@ -5,6 +5,14 @@
         style="flex:1 1 0;display: flex;align-items: center;padding-left: 10px;"
       >GoogleDocumentの一覧</div>
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
+      <a
+        href="https://docs.google.com/spreadsheets/create"
+        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;"
+      >新規Spread</a>
+      <a
+        href="https://docs.google.com/document/create"
+        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;"
+      >新規Document</a>
       <button v-on:click="reload_data" :disabled="disable_reload_select_ui">再読込</button>
       <select @change="reload_data()" v-model="sort_model" :disabled="disable_reload_select_ui">
         <option value="last_view_me" selected>最終閲覧(自分)</option>
