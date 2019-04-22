@@ -4,7 +4,8 @@ const v2 = new GoogleDocList<object, { set_callback: (cb: () => void) => void }>
     redirect_url: String(process.env.VUE_APP_CALLBACK_URL || ""),
     クライアントID: String(process.env.VUE_APP_API_CLIENT_ID || ""),
     クライアントシークレット: String(process.env.VUE_APP_API_CLIENT_SECRET || ""),
-    chromeのidentityiAPIを使う: !!process.env.VUE_APP_USE_CHROME_IDENTITY_API
+    chromeのidentityiAPIを使う: !!process.env.VUE_APP_USE_CHROME_IDENTITY_API,
+    evernoteのドキュメント一覧のapi : String(process.env.VUE_APP_EVERNOTE_LIST_API || "")
   }
 });
 v2.$mount(String(process.env.VUE_APP_MOUNT_QUERY || ""));

@@ -24,48 +24,26 @@
     </div>
     <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">絞り込み検索</div>
-      <input
-        type="search"
-        style="flex:1 1 0;"
-        v-model="filter_keyword"
-        placeholder="絞り込みキーワード"
-      >
+      <input type="search" style="flex:1 1 0;" v-model="filter_keyword" placeholder="絞り込みキーワード">
     </div>
     <ul v-if="auth_status == '認証情報あり'" style="flex:1 1 0;margin-top:0;overflow-y:scroll;">
       <li
-        v-for="item in filterd_list"
-        :key="item.id"
+        v-for="item in filterd_list2"
+        :key="item.link"
         style="display:flex;border-bottom:solid 1px silver;"
       >
         <a
-          :href="getLink(item.id,item.mimeType)"
+          :href="item.link"
           style="display:flex;align-items: center;width:100%;text-decoration:none;"
         >
           <div style="flex:0 0 25px;display: flex;justify-content: center;">
-            <img v-bind:src="item.iconLink" style="object-fit:contain;width:16px;height:16px;">
+            <img v-bind:src="item.iconUrl" style="object-fit:contain;width:16px;height:16px;">
           </div>
           <div style="flex:1 1 0;">
-            <div style="font-size:small;">{{ item.name }}</div>
+            <div style="font-size:small;">{{ item.title }}</div>
             <div
-              v-if="sort_model=='last_view_me'"
               style="font-size:x-small;"
-            >閲覧日時：{{formatDateFromString(item.viewedByMeTime)}}</div>
-            <div
-              v-else-if="sort_model=='last_update_me'"
-              style="font-size:x-small;"
-            >更新日時：{{formatDateFromString(item.modifiedByMeTime)}}</div>
-            <div
-              v-else-if="sort_model=='last_update'"
-              style="font-size:x-small;"
-            >更新日時：{{formatDateFromString(item.modifiedTime)}}</div>
-            <div
-              v-else-if="sort_model=='createdTime'"
-              style="font-size:x-small;"
-            >作成日時：{{formatDateFromString(item.createdTime)}}</div>
-            <div
-              v-else-if="sort_model=='title'"
-              style="font-size:x-small;"
-            >最終更新：{{formatDateFromString(item.modifiedTime)}}</div>
+            >{{item.timestamp.label}}：{{formatDateFromString(item.timestamp.value)}}</div>
           </div>
         </a>
       </li>
@@ -82,10 +60,28 @@ import Vue from "vue";
 import dateformat from "dateformat";
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub`
+type SortType = "last_view_me" | "last_update_me" | "last_update" | "createdTime" | "title";
 type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
 type GoogleModifiedByMe = { modifiedByMe: false } | { modifiedByMe: true, modifiedByMeTime: string }
 type GoogleApiData = {
-  files: ({ id: string, name: string, mimeType: string, iconLink: string, viewedByMeTime: string, createdTime: string, modifiedTime: string } & GoogleApiViewByMe & GoogleApiViewByMe)[]
+  files: ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe)[]
+};
+type EvernoteApiData = {
+  title: string,
+  //size: number,
+  updateDate: Date,
+  createdDate: Date,
+  guid: string,
+  //notebookName: string
+};
+type ListItem = {
+  link: string,
+  title: string,
+  iconUrl: string,
+  timestamp: {
+    value: Date,
+    label: string
+  }
 };
 function isGoogleApiData(data: any): data is GoogleApiData {
   if (data == null || typeof data !== "object") { return false; }
@@ -105,8 +101,12 @@ function isGoogleApiData(data: any): data is GoogleApiData {
   }
   return true;
 }
-function get_sort_option() {
-  return String(localStorage[`${vue_element_key}-sort-option`] || "");
+function get_sort_option(): SortType {
+  const saveRawValue = String(localStorage[`${vue_element_key}-sort-option`] || "");
+  if (saveRawValue == "last_view_me" || saveRawValue == "last_update_me" || saveRawValue == "last_update" || saveRawValue == "createdTime" || saveRawValue == "title") {
+    return saveRawValue;
+  }
+  return "last_update";
 }
 function save_sort_option(sort_option: string) {
   localStorage[`${vue_element_key}-sort-option`] = sort_option;
@@ -117,10 +117,27 @@ function save_refresh_token(refresh_token: string) {
 function get_refresh_token() {
   return String(localStorage[`${vue_element_key}-refresh-token`] || "");
 }
+async function loadEvernoteData(url: string): Promise<EvernoteApiData[]> {
+  if (url == "") {
+    return [];
+  }
+  const result: EvernoteApiData[] = [];
+  const json = await fetch(url).then(response => response.json());
+  if (Array.isArray(json) == false) { return []; }
+  for (let v of json) {
+    result.push({
+      title: v.title,
+      guid: v.guid,
+      updateDate: new Date(v.updateDate),
+      createdDate: new Date(v.createdDate)
+    });
+  }
+  return result;
+}
 
 export default Vue.extend({
   mounted: function () {
-    this.sort_model = get_sort_option() !== "" ? get_sort_option() : this.sort_model;
+    this.sort_model = get_sort_option();
     const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
     const URLにcodeがある = document.location.href.match(/\?code=(.+?)&/) != null;
     if (chrome拡張のapiを使う && chrome && chrome.identity && chrome.identity.getAuthToken) {
@@ -134,6 +151,9 @@ export default Vue.extend({
           this.auth_status = "認証情報あり";
           this.access_token = token;
           this.reload_data();
+          loadEvernoteData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+            this.evernote_api_result = evernoteList;
+          });
         }
       })
     } else if (URLにcodeがある) {
@@ -152,6 +172,9 @@ export default Vue.extend({
       this.access_token_refresh().then(b => {
         this.access_token = b.accessToken;
         this.reload_data();
+        loadEvernoteData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+          this.evernote_api_result = evernoteList;
+        });
       }).catch(e => {
         alert(`コードからアクセストークンとリフレッシュトークンを取得する事に失敗しました。\n${e}`);
         save_refresh_token("");
@@ -165,21 +188,141 @@ export default Vue.extend({
     redirect_url: { type: String, required: true },
     クライアントID: { type: String, required: true },
     クライアントシークレット: { type: String, required: true },
-    chromeのidentityiAPIを使う: { type: Boolean, required: true }
+    chromeのidentityiAPIを使う: { type: Boolean, required: true },
+    evernoteのドキュメント一覧のapi: { type: String, required: false }
   },
   data: function () {
     return {
       google_drive_api_result: { files: [] } as GoogleApiData,
-      sort_model: "last_view_me",
+      evernote_api_result: [] as EvernoteApiData[],
+      sort_model: "last_view_me" as SortType,
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
       loading_message_show: false,
-      filter_keyword: ""
+      filter_keyword: "",
     };
   },
   computed: {
     disable_reload_select_ui: function () {
       return this.loading_message_show;
+    },
+    filterd_list2: function (): ListItem[] {
+      const result: (ListItem & { sortValue: string })[] = [];
+      const sortType = this.sort_model;
+      const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
+      // google driveのファイルを追加
+      this.google_drive_api_result.files.forEach(a => {
+        let link = "";
+        if (a.mimeType === "application/vnd.google-apps.document") {
+          link = `https://docs.google.com/document/d/${a.id}/edit`;
+        } else if (a.mimeType == "application/vnd.google-apps.spreadsheet") {
+          link = `https://docs.google.com/spreadsheets/d/${a.id}/edit`;
+        } else {
+          return;
+        }
+        let timestamp: Date;
+        let timeLabel: string;
+        let sortValue: string | null;
+        switch (sortType) {
+          case "last_view_me":
+            if (a.viewedByMe) {
+              timestamp = new Date(a.viewedByMeTime);
+              timeLabel = "閲覧日時";
+              sortValue = String(new Date(a.viewedByMeTime).getTime());
+            } else {
+              return
+            }
+            break;
+          case "last_update_me":
+            if (a.modifiedByMe) {
+              timestamp = new Date(a.modifiedByMeTime);
+              timeLabel = "更新日時";
+              sortValue = String(new Date(a.modifiedByMeTime).getTime());
+            } else {
+              return;
+            }
+            break;
+          case "last_update":
+            timestamp = new Date(a.modifiedTime);
+            timeLabel = "更新日時";
+            sortValue = String(new Date(a.modifiedTime).getTime());
+            break;
+          case "createdTime":
+            timestamp = new Date(a.createdTime);
+            timeLabel = "作成日時";
+            sortValue = String(new Date(a.createdTime).getTime());
+            break;
+          case "title":
+            timestamp = new Date(a.modifiedTime)
+            timeLabel = "更新日時";
+            sortValue = a.name;
+            break;
+          default: return;
+        }
+        result.push({
+          title: a.name,
+          link,
+          iconUrl: a.iconLink,
+          timestamp: {
+            value: timestamp,
+            label: timeLabel
+          },
+          sortValue: sortValue
+        });
+      });
+      this.evernote_api_result.forEach(a => {
+        let timestamp: Date;
+        let timeLabel: string;
+        let sortValue: string | null;
+        switch (sortType) {
+          case "last_view_me": return;
+          case "last_update_me":
+            timestamp = new Date(a.updateDate);
+            timeLabel = "更新日時";
+            sortValue = String(new Date(a.updateDate).getTime());
+            break;
+          case "last_update":
+            timestamp = new Date(a.updateDate);
+            timeLabel = "更新日時";
+            sortValue = String(new Date(a.updateDate).getTime());
+            break;
+          case "createdTime":
+            timestamp = new Date(a.createdDate);
+            timeLabel = "作成日時";
+            sortValue = String(new Date(a.createdDate).getTime());
+            break;
+          case "title":
+            timestamp = new Date(a.updateDate)
+            timeLabel = "更新日時";
+            sortValue = a.title;
+            break;
+          default: return;
+        }
+        result.push({
+          title: a.title,
+          iconUrl: "https://www.evernote.com/favicon.ico?v2",
+          link: `https://www.evernote.com/client/web#?an=true&fs=true&n=${a.guid}`,
+          timestamp: {
+            value: timestamp,
+            label: timeLabel
+          },
+          sortValue: sortValue
+        });
+      });
+      const sortMulti = sortType == "title" ? 1 : -1;// titleの時は昇順にソートするが、それ以外は新しい方から見たいので降順ソートにする
+      result.sort((a, b) => {
+        return a.sortValue.localeCompare(b.sortValue) * sortMulti;
+      });
+      if (keywords.length == 0) {
+        return result;
+      } else {
+        return result.filter(a => {
+          const name = a.title.toLowerCase();
+          return keywords.find(keyword => {
+            return name.includes(keyword);
+          }) !== undefined;
+        });
+      }
     },
     filterd_list: function () {
       const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
