@@ -1,20 +1,24 @@
 <template>
   <div style="display:flex;flex-direction:column;height:100%;">
-    <div style="flex:0 0 auto;display:flex;background:silver;height:2em;">
+    <div style="flex:0 0 auto;display:flex;background:silver;height:2em;align-items: center;">
       <div
-        style="flex:1 1 0;display: flex;align-items: center;padding-left: 10px;"
+        style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
       >GoogleDocumentの一覧</div>
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
       <a
         href="https://docs.google.com/spreadsheets/create"
-        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;"
-      >新規Spread</a>
+        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
+      ><img :src="icon_image.googleDocsSpread" style="object-fit:contain;width:20px;height:20px;" title="google docs spread"></a>
       <a
         href="https://docs.google.com/document/create"
-        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;"
-      >新規Document</a>
-      <button v-on:click="reload_data" :disabled="disable_reload_select_ui">再読込</button>
-      <select @change="reload_data()" v-model="sort_model" :disabled="disable_reload_select_ui">
+        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
+      ><img :src="icon_image.googleDocsDocument" style="object-fit:contain;width:20px;height:20px;" title="google docs document"></a>
+      <a
+        href="https://www.evernote.com/client/web"
+        style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
+      ><img :src="icon_image.evernote" style="object-fit:contain;width:20px;height:20px;" title="evernote"></a>
+      <button v-on:click="reload_data" :disabled="disable_reload_select_ui" style="height: 100%;">再読込</button>
+      <select @change="reload_data()" v-model="sort_model" :disabled="disable_reload_select_ui" style="height: 100%;">
         <option value="last_view_me" selected>最終閲覧(自分)</option>
         <option value="last_update_me">最終更新(自分)</option>
         <option value="last_update">最終更新</option>
@@ -37,7 +41,7 @@
           style="display:flex;align-items: center;width:100%;text-decoration:none;"
         >
           <div style="flex:0 0 25px;display: flex;justify-content: center;">
-            <img v-bind:src="item.iconUrl" style="object-fit:contain;width:16px;height:16px;">
+            <img v-bind:src="item.iconUrl" style="object-fit:contain;width:20px;height:20px;">
           </div>
           <div style="flex:1 1 0;">
             <div style="font-size:small;">{{ item.title }}</div>
@@ -200,6 +204,11 @@ export default Vue.extend({
       access_token: "",
       loading_message_show: false,
       filter_keyword: "",
+      icon_image:{
+        googleDocsDocument:require("./images/icon-google-docs-doc.svg"),
+        googleDocsSpread:require("./images/icon-google-docs-spread.svg"),
+        evernote:require("./images/icon-evernote.svg")
+      }
     };
   },
   computed: {
@@ -213,10 +222,13 @@ export default Vue.extend({
       // google driveのファイルを追加
       this.google_drive_api_result.files.forEach(a => {
         let link = "";
+        let iconImage = "";
         if (a.mimeType === "application/vnd.google-apps.document") {
           link = `https://docs.google.com/document/d/${a.id}/edit`;
+          iconImage = this.icon_image.googleDocsDocument;
         } else if (a.mimeType == "application/vnd.google-apps.spreadsheet") {
           link = `https://docs.google.com/spreadsheets/d/${a.id}/edit`;
+          iconImage = this.icon_image.googleDocsSpread;
         } else {
           return;
         }
@@ -262,7 +274,7 @@ export default Vue.extend({
         result.push({
           title: a.name,
           link,
-          iconUrl: a.iconLink,
+          iconUrl: iconImage,
           timestamp: {
             value: timestamp,
             label: timeLabel
@@ -300,7 +312,7 @@ export default Vue.extend({
         }
         result.push({
           title: a.title,
-          iconUrl: "https://www.evernote.com/favicon.ico?v2",
+          iconUrl: this.icon_image.evernote,
           link: `https://www.evernote.com/client/web#?an=true&fs=true&n=${a.guid}`,
           timestamp: {
             value: timestamp,
@@ -493,7 +505,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 ul {
-  padding-left: 0;
+  padding-left: 0; 
 }
 ul > li {
   list-style: none;
