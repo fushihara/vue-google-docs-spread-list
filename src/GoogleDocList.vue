@@ -57,7 +57,7 @@
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">絞り込み検索</div>
       <input type="search" style="flex:1 1 0;" v-model="filter_keyword" placeholder="絞り込みキーワード">
     </div>
-    <ul v-if="auth_status == '認証情報あり'" style="flex:1 1 0;margin-top:0;overflow-y:scroll;">
+    <ul v-if="auth_status == '認証情報あり'" style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain" data-is-scroll-parent>
       <li
         v-for="item in filterd_list2"
         :key="item.link"
