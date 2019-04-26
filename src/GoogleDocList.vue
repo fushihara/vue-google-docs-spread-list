@@ -98,13 +98,24 @@ type GoogleApiData = {
   files: ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe)[]
 };
 type EvernoteApiData = {
+  userData: EvernoteUserData,
+  noteBooks: EvernoteNotebookData[]
+};
+type EvernoteUserData = {
+  id: number,//123456
+  name: string,//あいうえお
+  shardId: string,//s123
+  username: string//aiueo
+}
+type EvernoteNotebookData = {
   title: string,
-  //size: number,
-  updateDate:  Date, 
+  size: number,
+  updateDate: Date,
   createdDate: Date,
   guid: string,
-  //notebookName: string
-};
+  notebookName: string
+  notebookGuid: string
+}
 type ListItem = {
   link: string,
   title: string,
@@ -148,22 +159,38 @@ function save_refresh_token(refresh_token: string) {
 function get_refresh_token() {
   return String(localStorage[`${vue_element_key}-refresh-token`] || "");
 }
-async function loadEvernoteData(url: string): Promise<EvernoteApiData[]> {
+async function loadEvernoteData(url: string): Promise<EvernoteApiData | null> {
   if (url == "") {
-    return [];
+    return null;
   }
   const result: EvernoteApiData[] = [];
   const json = await fetch(url).then(response => response.json());
-  if (Array.isArray(json) == false) { return []; }
-  for (let v of json) {
-    result.push({
-      title: v.title,
-      guid: v.guid,
+  if (json === null || json === undefined) { return null; }
+  if (typeof json !== "object") { return null; }
+  if (!Array.isArray(json.noteBooks)) { return null; }
+  const notebooks: EvernoteNotebookData[] = [];
+  for (let v of json.noteBooks) {
+    if (v == null) { return null; }
+    notebooks.push({
+      title: String(v.title),
+      size: Number(v.size),
       updateDate: new Date(String(v.updateDate)),
-      createdDate: new Date(String(v.createdDate))
+      createdDate: new Date(String(v.createdDate)),
+      guid: String(v.guid),
+      notebookName: String(v.notebookName),
+      notebookGuid: String(v.notebookGuid)
     });
   }
-  return result;
+  const userData: EvernoteUserData = {
+    id: Number(json.userData.id),
+    name: String(json.userData.name),
+    shardId: String(json.userData.shardId),
+    username: String(json.userData.username),
+  }
+  return {
+    userData,
+    noteBooks: notebooks
+  };
 }
 
 export default Vue.extend({
@@ -225,7 +252,7 @@ export default Vue.extend({
   data: function () {
     return {
       google_drive_api_result: { files: [] } as GoogleApiData,
-      evernote_api_result: [] as EvernoteApiData[],
+      evernote_api_result: null as (EvernoteApiData | null),
       sort_model: "last_view_me" as SortType,
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
@@ -309,45 +336,53 @@ export default Vue.extend({
           sortValue: sortValue
         });
       });
-      this.evernote_api_result.forEach(a => {
-        let timestamp: Date;
-        let timeLabel: string;
-        let sortValue: string | null;
-        switch (sortType) {
-          case "last_view_me": return;
-          case "last_update_me":
-            timestamp = new Date(String(a.updateDate));
-            timeLabel = "更新日時";
-            sortValue = String(new Date(String(a.updateDate)).getTime());
-            break;
-          case "last_update":
-            timestamp = new Date(String(a.updateDate));
-            timeLabel = "更新日時";
-            sortValue = String(new Date(String(a.updateDate)).getTime());
-            break;
-          case "createdTime":
-            timestamp = new Date(String(a.createdDate));
-            timeLabel = "作成日時";
-            sortValue = String(new Date(String(a.createdDate)).getTime());
-            break;
-          case "title":
-            timestamp = new Date(String(a.updateDate))
-            timeLabel = "更新日時";
-            sortValue = a.title;
-            break;
-          default: return;
-        }
-        result.push({
-          title: a.title,
-          iconUrl: this.icon_image.evernote,
-          link: `https://www.evernote.com/client/web#?an=true&fs=true&n=${a.guid}`,
-          timestamp: {
-            value: timestamp,
-            label: timeLabel
-          },
-          sortValue: sortValue
+      if (this.evernote_api_result) {
+        const evernoteUserData = this.evernote_api_result.userData;
+        this.evernote_api_result.noteBooks.forEach(a => {
+          let timestamp: Date;
+          let timeLabel: string;
+          let sortValue: string | null;
+          switch (sortType) {
+            case "last_view_me": return;
+            case "last_update_me":
+              timestamp = new Date(String(a.updateDate));
+              timeLabel = "更新日時";
+              sortValue = String(new Date(String(a.updateDate)).getTime());
+              break;
+            case "last_update":
+              timestamp = new Date(String(a.updateDate));
+              timeLabel = "更新日時";
+              sortValue = String(new Date(String(a.updateDate)).getTime());
+              break;
+            case "createdTime":
+              timestamp = new Date(String(a.createdDate));
+              timeLabel = "作成日時";
+              sortValue = String(new Date(String(a.createdDate)).getTime());
+              break;
+            case "title":
+              timestamp = new Date(String(a.updateDate))
+              timeLabel = "更新日時";
+              sortValue = a.title;
+              break;
+            default: return;
+          }
+          const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
+          const linkUrl = isMobilePhone
+            ? `evernote:///view/${evernoteUserData.id}/${evernoteUserData.shardId}/${a.guid}/${a.guid}/` :
+            `https://www.evernote.com/client/web#?an=true&fs=true&n=${a.guid}`;//pc版
+
+          result.push({
+            title: a.title,
+            iconUrl: this.icon_image.evernote,
+            link: linkUrl,
+            timestamp: {
+              value: timestamp,
+              label: timeLabel
+            },
+            sortValue: sortValue
+          });
         });
-      });
+      }
       const sortMulti = sortType == "title" ? 1 : -1;// titleの時は昇順にソートするが、それ以外は新しい方から見たいので降順ソートにする
       result.sort((a, b) => {
         return a.sortValue.localeCompare(b.sortValue) * sortMulti;
