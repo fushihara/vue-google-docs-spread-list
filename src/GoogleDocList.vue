@@ -195,6 +195,12 @@ async function loadEvernoteData(url: string): Promise<EvernoteApiData | null> {
 
 export default Vue.extend({
   mounted: function () {
+    this.$el.addEventListener("ScrollTop", () => {
+      const el = this.$el.querySelector("[data-is-scroll-parent]");
+      if(el){
+        el.scrollTop = 0
+      }
+    });
     this.sort_model = get_sort_option();
     const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
     const URLにcodeがある = document.location.href.match(/\?code=(.+?)&/) != null;
