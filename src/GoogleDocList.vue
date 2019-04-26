@@ -8,17 +8,44 @@
       <a
         href="https://docs.google.com/spreadsheets/create"
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
-      ><img :src="icon_image.googleDocsSpread" style="object-fit:contain;width:20px;height:20px;" title="google docs spread"></a>
+      >
+        <img
+          :src="icon_image.googleDocsSpread"
+          style="object-fit:contain;width:20px;height:20px;"
+          title="google docs spread"
+        >
+      </a>
       <a
         href="https://docs.google.com/document/create"
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
-      ><img :src="icon_image.googleDocsDocument" style="object-fit:contain;width:20px;height:20px;" title="google docs document"></a>
+      >
+        <img
+          :src="icon_image.googleDocsDocument"
+          style="object-fit:contain;width:20px;height:20px;"
+          title="google docs document"
+        >
+      </a>
       <a
         href="https://www.evernote.com/client/web"
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
-      ><img :src="icon_image.evernote" style="object-fit:contain;width:20px;height:20px;" title="evernote"></a>
-      <button v-on:click="reload_data" :disabled="disable_reload_select_ui" style="height: 100%;">再読込</button>
-      <select @change="reload_data()" v-model="sort_model" :disabled="disable_reload_select_ui" style="height: 100%;">
+      >
+        <img
+          :src="icon_image.evernote"
+          style="object-fit:contain;width:20px;height:20px;"
+          title="evernote"
+        >
+      </a>
+      <button
+        v-on:click="reload_data"
+        :disabled="disable_reload_select_ui"
+        style="height: 100%;"
+      >再読込</button>
+      <select
+        @change="reload_data()"
+        v-model="sort_model"
+        :disabled="disable_reload_select_ui"
+        style="height: 100%;"
+      >
         <option value="last_view_me" selected>最終閲覧(自分)</option>
         <option value="last_update_me">最終更新(自分)</option>
         <option value="last_update">最終更新</option>
@@ -73,7 +100,7 @@ type GoogleApiData = {
 type EvernoteApiData = {
   title: string,
   //size: number,
-  updateDate: Date,
+  updateDate:  Date, 
   createdDate: Date,
   guid: string,
   //notebookName: string
@@ -132,8 +159,8 @@ async function loadEvernoteData(url: string): Promise<EvernoteApiData[]> {
     result.push({
       title: v.title,
       guid: v.guid,
-      updateDate: new Date(v.updateDate),
-      createdDate: new Date(v.createdDate)
+      updateDate: new Date(String(v.updateDate)),
+      createdDate: new Date(String(v.createdDate))
     });
   }
   return result;
@@ -204,10 +231,10 @@ export default Vue.extend({
       access_token: "",
       loading_message_show: false,
       filter_keyword: "",
-      icon_image:{
-        googleDocsDocument:require("./images/icon-google-docs-doc.svg"),
-        googleDocsSpread:require("./images/icon-google-docs-spread.svg"),
-        evernote:require("./images/icon-evernote.svg")
+      icon_image: {
+        googleDocsDocument: require("./images/icon-google-docs-doc.svg"),
+        googleDocsSpread: require("./images/icon-google-docs-spread.svg"),
+        evernote: require("./images/icon-evernote.svg")
       }
     };
   },
@@ -238,34 +265,34 @@ export default Vue.extend({
         switch (sortType) {
           case "last_view_me":
             if (a.viewedByMe) {
-              timestamp = new Date(a.viewedByMeTime);
+              timestamp = new Date(String(a.viewedByMeTime));
               timeLabel = "閲覧日時";
-              sortValue = String(new Date(a.viewedByMeTime).getTime());
+              sortValue = String(new Date(String(a.viewedByMeTime)).getTime());
             } else {
               return
             }
             break;
           case "last_update_me":
             if (a.modifiedByMe) {
-              timestamp = new Date(a.modifiedByMeTime);
+              timestamp = new Date(String(a.modifiedByMeTime));
               timeLabel = "更新日時";
-              sortValue = String(new Date(a.modifiedByMeTime).getTime());
+              sortValue = String(new Date(String(a.modifiedByMeTime)).getTime());
             } else {
               return;
             }
             break;
           case "last_update":
-            timestamp = new Date(a.modifiedTime);
+            timestamp = new Date(String(a.modifiedTime));
             timeLabel = "更新日時";
-            sortValue = String(new Date(a.modifiedTime).getTime());
+            sortValue = String(new Date(String(a.modifiedTime)).getTime());
             break;
           case "createdTime":
-            timestamp = new Date(a.createdTime);
+            timestamp = new Date(String(a.createdTime));
             timeLabel = "作成日時";
-            sortValue = String(new Date(a.createdTime).getTime());
+            sortValue = String(new Date(String(a.createdTime)).getTime());
             break;
           case "title":
-            timestamp = new Date(a.modifiedTime)
+            timestamp = new Date(String(a.modifiedTime))
             timeLabel = "更新日時";
             sortValue = a.name;
             break;
@@ -289,22 +316,22 @@ export default Vue.extend({
         switch (sortType) {
           case "last_view_me": return;
           case "last_update_me":
-            timestamp = new Date(a.updateDate);
+            timestamp = new Date(String(a.updateDate));
             timeLabel = "更新日時";
-            sortValue = String(new Date(a.updateDate).getTime());
+            sortValue = String(new Date(String(a.updateDate)).getTime());
             break;
           case "last_update":
-            timestamp = new Date(a.updateDate);
+            timestamp = new Date(String(a.updateDate));
             timeLabel = "更新日時";
-            sortValue = String(new Date(a.updateDate).getTime());
+            sortValue = String(new Date(String(a.updateDate)).getTime());
             break;
           case "createdTime":
-            timestamp = new Date(a.createdDate);
+            timestamp = new Date(String(a.createdDate));
             timeLabel = "作成日時";
-            sortValue = String(new Date(a.createdDate).getTime());
+            sortValue = String(new Date(String(a.createdDate)).getTime());
             break;
           case "title":
-            timestamp = new Date(a.updateDate)
+            timestamp = new Date(String(a.updateDate))
             timeLabel = "更新日時";
             sortValue = a.title;
             break;
@@ -505,7 +532,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 ul {
-  padding-left: 0; 
+  padding-left: 0;
 }
 ul > li {
   list-style: none;
