@@ -1,5 +1,5 @@
 <template>
-  <div style="display:flex;flex-direction:column;height:100%;">
+  <div style="display:flex;flex-direction:column;height:100%;background:white;">
     <div style="flex:0 0 auto;display:flex;background:silver;height:2em;align-items: center;">
       <div
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
