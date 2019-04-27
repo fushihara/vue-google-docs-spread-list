@@ -408,18 +408,6 @@ export default Vue.extend({
           }) !== undefined;
         });
       }
-    },
-    filterd_list: function () {
-      const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
-      if (keywords.length == 0) {
-        return this.google_drive_api_result.files;
-      }
-      return this.google_drive_api_result.files.filter(a => {
-        const name = a.name.toLowerCase();
-        return keywords.find(keyword => {
-          return name.includes(keyword);
-        });
-      });
     }
   },
   methods: {
