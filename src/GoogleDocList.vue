@@ -94,60 +94,10 @@
 import Vue from "vue";
 import dateformat from "dateformat";
 import { GoogleApi } from "./google-api"
-import { SortType } from './shims-tsx';
+import { EvernoteApi } from "./evernote-api"
+import { SortType, ListItem, ListItemWithSortValue } from './shims-tsx';
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub`
-type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
-type GoogleModifiedByMe = { modifiedByMe: false } | { modifiedByMe: true, modifiedByMeTime: string }
-type GoogleApiData = {
-  files: ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe)[]
-};
-type EvernoteApiData = {
-  userData: EvernoteUserData,
-  noteBooks: EvernoteNotebookData[]
-};
-type EvernoteUserData = {
-  id: number,//123456
-  name: string,//あいうえお
-  shardId: string,//s123
-  username: string//aiueo
-}
-type EvernoteNotebookData = {
-  title: string,
-  size: number,
-  updateDate: Date,
-  createdDate: Date,
-  guid: string,
-  notebookName: string
-  notebookGuid: string
-}
-type ListItem = {
-  link: string,
-  title: string,
-  iconUrl: string,
-  timestamp: {
-    value: Date,
-    label: string
-  }
-};
-function isGoogleApiData(data: any): data is GoogleApiData {
-  if (data == null || typeof data !== "object") { return false; }
-  if (data.files == null || Array.isArray(data.files) === false) { return false; }
-  for (let d of data.files) {
-    if (d == null || typeof d !== "object") { debugger; return false; }
-    if (typeof d.id !== "string") { debugger; return false; }
-    if (typeof d.name !== "string") { debugger; return false; }
-    if (typeof d.mimeType !== "string") { debugger; return false; }
-    if (typeof d.iconLink !== "string") { debugger; return false; }
-    if (typeof d.createdTime !== "string") { debugger; return false; }
-    if (typeof d.modifiedTime !== "string") { debugger; return false; }
-    if (typeof d.modifiedByMe !== "boolean") { debugger; return false; }
-    if (d.modifiedByMe === true && typeof d.modifiedByMeTime !== "string") { debugger; return false; }
-    if (typeof d.viewedByMe !== "boolean") { debugger; return false; }
-    if (d.viewedByMe === true && typeof d.viewedByMeTime !== "string") { debugger; return false; }
-  }
-  return true;
-}
 function get_sort_option(): SortType {
   const saveRawValue = String(localStorage[`${vue_element_key}-sort-option`] || "");
   if (saveRawValue == "last_view_me" || saveRawValue == "last_update_me" || saveRawValue == "last_update" || saveRawValue == "createdTime" || saveRawValue == "title") {
@@ -164,40 +114,6 @@ function save_refresh_token(refresh_token: string) {
 function get_refresh_token() {
   return String(localStorage[`${vue_element_key}-refresh-token`] || "");
 }
-async function loadEvernoteData(url: string): Promise<EvernoteApiData | null> {
-  if (url == "") {
-    return null;
-  }
-  const result: EvernoteApiData[] = [];
-  const json = await fetch(url).then(response => response.json());
-  if (json === null || json === undefined) { return null; }
-  if (typeof json !== "object") { return null; }
-  if (!Array.isArray(json.noteBooks)) { return null; }
-  const notebooks: EvernoteNotebookData[] = [];
-  for (let v of json.noteBooks) {
-    if (v == null) { return null; }
-    notebooks.push({
-      title: String(v.title),
-      size: Number(v.size),
-      updateDate: new Date(String(v.updateDate)),
-      createdDate: new Date(String(v.createdDate)),
-      guid: String(v.guid),
-      notebookName: String(v.notebookName),
-      notebookGuid: String(v.notebookGuid)
-    });
-  }
-  const userData: EvernoteUserData = {
-    id: Number(json.userData.id),
-    name: String(json.userData.name),
-    shardId: String(json.userData.shardId),
-    username: String(json.userData.username),
-  }
-  return {
-    userData,
-    noteBooks: notebooks
-  };
-}
-
 export default Vue.extend({
   mounted: function () {
     this.$el.addEventListener("ScrollTop", () => {
@@ -220,7 +136,7 @@ export default Vue.extend({
           this.auth_status = "認証情報あり";
           this.access_token = token;
           this.reload_data();
-          loadEvernoteData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+          EvernoteApi.DataRequest.loadData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
             this.evernote_api_result = evernoteList;
           });
         }
@@ -241,7 +157,7 @@ export default Vue.extend({
       this.access_token_refresh().then(b => {
         this.access_token = b.accessToken;
         this.reload_data();
-        loadEvernoteData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+        EvernoteApi.DataRequest.loadData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
           this.evernote_api_result = evernoteList;
         });
       }).catch(e => {
@@ -262,8 +178,8 @@ export default Vue.extend({
   },
   data: function () {
     return {
-      google_drive_api_result: { files: [] } as GoogleApiData,
-      evernote_api_result: null as (EvernoteApiData | null),
+      google_drive_api_result: { files: [] } as GoogleApi.DataRequest.GoogleApiData,
+      evernote_api_result: null as (EvernoteApi.DataRequest.EvernoteApiData | null),
       sort_model: "last_view_me" as SortType,
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
@@ -281,123 +197,24 @@ export default Vue.extend({
       return this.loading_message_show;
     },
     filterd_list2: function (): ListItem[] {
-      const result: (ListItem & { sortValue: string })[] = [];
+      const result: ListItemWithSortValue = [];
       const sortType = this.sort_model;
-      const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
-      // google driveのファイルを追加
-      this.google_drive_api_result.files.forEach(a => {
-        let link = "";
-        let iconImage = "";
-        if (a.mimeType === "application/vnd.google-apps.document") {
-          link = `https://docs.google.com/document/d/${a.id}/edit`;
-          iconImage = this.icon_image.googleDocsDocument;
-        } else if (a.mimeType == "application/vnd.google-apps.spreadsheet") {
-          link = `https://docs.google.com/spreadsheets/d/${a.id}/edit`;
-          iconImage = this.icon_image.googleDocsSpread;
-        } else {
-          return;
-        }
-        let timestamp: Date;
-        let timeLabel: string;
-        let sortValue: string | null;
-        switch (sortType) {
-          case "last_view_me":
-            if (a.viewedByMe) {
-              timestamp = new Date(String(a.viewedByMeTime));
-              timeLabel = "閲覧日時";
-              sortValue = String(new Date(String(a.viewedByMeTime)).getTime());
-            } else {
-              return
-            }
-            break;
-          case "last_update_me":
-            if (a.modifiedByMe) {
-              timestamp = new Date(String(a.modifiedByMeTime));
-              timeLabel = "更新日時";
-              sortValue = String(new Date(String(a.modifiedByMeTime)).getTime());
-            } else {
-              return;
-            }
-            break;
-          case "last_update":
-            timestamp = new Date(String(a.modifiedTime));
-            timeLabel = "更新日時";
-            sortValue = String(new Date(String(a.modifiedTime)).getTime());
-            break;
-          case "createdTime":
-            timestamp = new Date(String(a.createdTime));
-            timeLabel = "作成日時";
-            sortValue = String(new Date(String(a.createdTime)).getTime());
-            break;
-          case "title":
-            timestamp = new Date(String(a.modifiedTime))
-            timeLabel = "更新日時";
-            sortValue = a.name;
-            break;
-          default: return;
-        }
-        result.push({
-          title: a.name,
-          link,
-          iconUrl: iconImage,
-          timestamp: {
-            value: timestamp,
-            label: timeLabel
-          },
-          sortValue: sortValue
-        });
-      });
-      if (this.evernote_api_result) {
-        const evernoteUserData = this.evernote_api_result.userData;
-        this.evernote_api_result.noteBooks.forEach(a => {
-          let timestamp: Date;
-          let timeLabel: string;
-          let sortValue: string | null;
-          switch (sortType) {
-            case "last_view_me": return;
-            case "last_update_me":
-              timestamp = new Date(String(a.updateDate));
-              timeLabel = "更新日時";
-              sortValue = String(new Date(String(a.updateDate)).getTime());
-              break;
-            case "last_update":
-              timestamp = new Date(String(a.updateDate));
-              timeLabel = "更新日時";
-              sortValue = String(new Date(String(a.updateDate)).getTime());
-              break;
-            case "createdTime":
-              timestamp = new Date(String(a.createdDate));
-              timeLabel = "作成日時";
-              sortValue = String(new Date(String(a.createdDate)).getTime());
-              break;
-            case "title":
-              timestamp = new Date(String(a.updateDate))
-              timeLabel = "更新日時";
-              sortValue = a.title;
-              break;
-            default: return;
-          }
-          const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
-          const linkUrl = isMobilePhone
-            ? `evernote:///view/${evernoteUserData.id}/${evernoteUserData.shardId}/${a.guid}/${a.guid}/` :
-            `https://www.evernote.com/client/web#?an=true&fs=true&n=${a.guid}`;//pc版
-
-          result.push({
-            title: a.title,
-            iconUrl: this.icon_image.evernote,
-            link: linkUrl,
-            timestamp: {
-              value: timestamp,
-              label: timeLabel
-            },
-            sortValue: sortValue
-          });
-        });
+      GoogleApi.DataFilter.convertDatas(this.google_drive_api_result, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
+        .forEach(a => {
+          result.push(a);
+        })
+      const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
+      if (this.evernote_api_result != null) {
+        EvernoteApi.DataFilter.convertDatas(this.evernote_api_result, sortType, this.icon_image.evernote, isMobilePhone)
+          .forEach(a => {
+            result.push(a);
+          })
       }
       const sortMulti = sortType == "title" ? 1 : -1;// titleの時は昇順にソートするが、それ以外は新しい方から見たいので降順ソートにする
       result.sort((a, b) => {
         return a.sortValue.localeCompare(b.sortValue) * sortMulti;
       });
+      const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
       if (keywords.length == 0) {
         return result;
       } else {
@@ -470,16 +287,11 @@ export default Vue.extend({
     },
     reload_data: function () {
       this.loading_message_show = true;
-      GoogleApi.DataRequest.getDataFromApi(this.sort_model, this.access_token)
-        .then(response =>
-          response.json().then(json => {
-            this.loading_message_show = false;
-            if (isGoogleApiData(json)) {
-              save_sort_option(this.sort_model);
-              this.google_drive_api_result = json;
-            }
-          })
-        );
+      GoogleApi.DataRequest.getDataFromApi(this.sort_model, this.access_token).then(json => {
+        this.loading_message_show = false;
+        save_sort_option(this.sort_model);
+        this.google_drive_api_result = json;
+      });
     }
   }
 });
