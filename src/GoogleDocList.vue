@@ -57,7 +57,11 @@
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">絞り込み検索</div>
       <input type="search" style="flex:1 1 0;" v-model="filter_keyword" placeholder="絞り込みキーワード">
     </div>
-    <ul v-if="auth_status == '認証情報あり'" style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain" data-is-scroll-parent>
+    <ul
+      v-if="auth_status == '認証情報あり'"
+      style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain"
+      data-is-scroll-parent
+    >
       <li
         v-for="item in filterd_list2"
         :key="item.link"
@@ -89,9 +93,10 @@
 <script lang="ts">
 import Vue from "vue";
 import dateformat from "dateformat";
+import { GoogleApi } from "./google-api"
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub`
-type SortType = "last_view_me" | "last_update_me" | "last_update" | "createdTime" | "title";
+type SortType = GoogleApi.SortType;
 type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
 type GoogleModifiedByMe = { modifiedByMe: false } | { modifiedByMe: true, modifiedByMeTime: string }
 type GoogleApiData = {
@@ -197,7 +202,7 @@ export default Vue.extend({
   mounted: function () {
     this.$el.addEventListener("ScrollTop", () => {
       const el = this.$el.querySelector("[data-is-scroll-parent]");
-      if(el){
+      if (el) {
         el.scrollTop = 0
       }
     });
@@ -418,15 +423,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    getLink: function (documentId: string, mimeType: string) {
-      if (mimeType === "application/vnd.google-apps.document") {
-        return `https://docs.google.com/document/d/${documentId}/edit`;
-      } else if (mimeType == "application/vnd.google-apps.spreadsheet") {
-        return `https://docs.google.com/spreadsheets/d/${documentId}/edit`;
-      } else {
-        return ``;
-      }
-    },
     formatDateFromString: function (dateString: string | null) {
       if (dateString == null) {
         return "";
@@ -449,55 +445,15 @@ export default Vue.extend({
       ];
       return dateformat(new Date(dateString), "yyyy/mm/dd(ddd)HH:MM:ss");
     },
-    access_token_refresh: function () {
-      const postValues = [];
-      postValues.push(`refresh_token=${encodeURIComponent(get_refresh_token())}`);
-      postValues.push(`client_id=${encodeURIComponent(this.クライアントID)}`);
-      postValues.push(`client_secret=${encodeURIComponent(this.クライアントシークレット)}`);
-      postValues.push(`grant_type=refresh_token`);
-      postValues.push(`access_type=offline`);
-      return fetch(`https://www.googleapis.com/oauth2/v4/token`, {
-        method: "post",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: postValues.join("&")
-      }).then(request => {
-        return request.json().then(json => {
-          const accessToken = String(json.access_token || "");
-          const expiresInSecond = String(json.expires_in || "");
-          return {
-            accessToken, expiresInSecond
-          }
-        });
-      });
+    access_token_refresh: async function () {
+      return await GoogleApi.getAccessTokenRefresh(get_refresh_token(), this.クライアントID, this.クライアントシークレット);
     },
-    access_token_new_get: function (code: string) {
+    access_token_new_get: async function (code: string) {
       this.loading_message_show = true;
-      const リダイレクトURL = this.redirect_url;
-      const postValues = [];
-      postValues.push(`code=${encodeURIComponent(code)}`);
-      postValues.push(`client_id=${encodeURIComponent(this.クライアントID)}`);
-      postValues.push(`client_secret=${encodeURIComponent(this.クライアントシークレット)}`);
-      postValues.push(`redirect_uri=${encodeURIComponent(リダイレクトURL)}`);
-      postValues.push(`grant_type=authorization_code`);
-      postValues.push(`access_type=offline`);
-      return fetch(`https://www.googleapis.com/oauth2/v4/token`, {
-        method: "post",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: postValues.join("&")
-      })
-        .then(request => {
-          return request.json().then(json => {
-            this.loading_message_show = false;
-            const accessToken = String(json.access_token || "");
-            const expiresInSecond = String(json.expires_in || "");
-            const refreshToken = String(json.refresh_token || "");
-            console.log(accessToken, expiresInSecond, refreshToken);
-            return {
-              accessToken, expiresInSecond, refreshToken
-            }
-          });
-        });
-
+      return await GoogleApi.getAccessTokenNewGet(code, this.redirect_url, this.クライアントID, this.クライアントシークレット).then(r => {
+        this.loading_message_show = false;
+        return r
+      });
     },
     auth_start_push: function () {
       const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
@@ -519,53 +475,23 @@ export default Vue.extend({
         return;
       }
       this.loading_message_show = true;
-      const urlBase = `https://accounts.google.com/o/oauth2/auth`;
-      const params = [];
-      const スコープs = [
-        "https://www.googleapis.com/auth/drive.metadata.readonly",
-      ];
-      params.push(`response_type=code`);
-      params.push(`client_id=${this.クライアントID}`);
-      params.push(`redirect_uri=${this.redirect_url}`);
-      params.push(`scope=${encodeURIComponent(スコープs.join(" "))}`);
-      params.push(`access_type=offline`);
-      params.push(`approval_prompt=force`);
-      const accessUrl = `${urlBase}?${params.join("&")}`;
-      document.location.href = accessUrl;
+      document.location.href = GoogleApi.getAuthStartUrl({
+        クライアントID: this.クライアントID,
+        リダイレクトURI: this.redirect_url
+      });
     },
     reload_data: function () {
       this.loading_message_show = true;
-      let orderBy = "";
-      switch (this.sort_model) {
-        case "last_view_me": orderBy = "viewedByMeTime desc"; break;
-        case "last_update_me": orderBy = "modifiedByMeTime desc"; break;
-        case "last_update": orderBy = "modifiedTime desc"; break;
-        case "title": orderBy = "name"; break;
-        case "createdTime": orderBy = "createdTime desc"; break;
-      }
-      fetch(
-        `https://www.googleapis.com/drive/v3/files?` +
-        [
-          "orderBy=" + encodeURIComponent(orderBy),
-          "q=" + encodeURIComponent("trashed = false and (mimeType = 'application/vnd.google-apps.spreadsheet' or mimeType = 'application/vnd.google-apps.document')"),
-          "fields=" + encodeURIComponent("files(kind,id,name,mimeType,iconLink,viewedByMe,viewedByMeTime,createdTime,modifiedTime,modifiedByMeTime,modifiedByMe)"),
-          "pageSize=1000",
-        ].join("&"),
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${this.access_token}`
-          }
-        }
-      ).then(response =>
-        response.json().then(json => {
-          this.loading_message_show = false;
-          if (isGoogleApiData(json)) {
-            save_sort_option(this.sort_model);
-            this.google_drive_api_result = json;
-          }
-        })
-      );
+      GoogleApi.getDataFromApi(this.sort_model, this.access_token)
+        .then(response =>
+          response.json().then(json => {
+            this.loading_message_show = false;
+            if (isGoogleApiData(json)) {
+              save_sort_option(this.sort_model);
+              this.google_drive_api_result = json;
+            }
+          })
+        );
     }
   }
 });
