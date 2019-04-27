@@ -1,4 +1,4 @@
-const StatsPlugin = require('stats-webpack-plugin'); // 作成したjsの中に入っているモジュールが何バイトの容量を使っているかチェックする
+//const StatsPlugin = require('stats-webpack-plugin'); // 作成したjsの中に入っているモジュールが何バイトの容量を使っているかチェックする
 module.exports = {
   css: {
     extract: false,
