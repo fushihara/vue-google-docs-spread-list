@@ -1,3 +1,5 @@
+import { SortType } from './shims-tsx';
+
 export namespace GoogleApi {
     export namespace Auth {
         export function getAuthStartUrl(val: { クライアントID: string, リダイレクトURI: string, }): string {
@@ -63,7 +65,6 @@ export namespace GoogleApi {
         }
     }
     export namespace DataRequest {
-        export type SortType = "last_view_me" | "last_update_me" | "last_update" | "createdTime" | "title";
         export async function getDataFromApi(sortType: SortType, accessToken: string): Promise<Response> {
             let orderBy = "";
             switch (sortType) {

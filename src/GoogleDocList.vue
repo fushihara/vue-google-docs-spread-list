@@ -94,6 +94,7 @@
 import Vue from "vue";
 import dateformat from "dateformat";
 import { GoogleApi } from "./google-api"
+import { SortType } from './shims-tsx';
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub`
 type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
@@ -147,7 +148,7 @@ function isGoogleApiData(data: any): data is GoogleApiData {
   }
   return true;
 }
-function get_sort_option(): GoogleApi.DataRequest.SortType {
+function get_sort_option(): SortType {
   const saveRawValue = String(localStorage[`${vue_element_key}-sort-option`] || "");
   if (saveRawValue == "last_view_me" || saveRawValue == "last_update_me" || saveRawValue == "last_update" || saveRawValue == "createdTime" || saveRawValue == "title") {
     return saveRawValue;
@@ -263,7 +264,7 @@ export default Vue.extend({
     return {
       google_drive_api_result: { files: [] } as GoogleApiData,
       evernote_api_result: null as (EvernoteApiData | null),
-      sort_model: "last_view_me" as GoogleApi.DataRequest.SortType,
+      sort_model: "last_view_me" as SortType,
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
       loading_message_show: false,

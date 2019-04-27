@@ -7,3 +7,4 @@ declare global {
     }
   }
 }
+export type SortType = "last_view_me" | "last_update_me" | "last_update" | "createdTime" | "title";
