@@ -3,7 +3,7 @@
     <div style="flex:0 0 auto;display:flex;background:silver;height:1.5em;align-items: center;">
       <div
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
-      >GoogleDocumentの一覧</div>
+      >Web Documents</div>
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
       <a
         href="https://docs.google.com/spreadsheets/create"
@@ -26,7 +26,7 @@
         >
       </a>
       <a
-        href="https://www.evernote.com/client/web"
+        :href="evernote_new_link"
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
       >
         <img
@@ -59,7 +59,7 @@
     </div>
     <ul
       v-if="auth_status == '認証情報あり'"
-      style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain"
+      style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain;margin-bottom:0;"
       data-is-scroll-parent
     >
       <li
@@ -195,6 +195,14 @@ export default Vue.extend({
     };
   },
   computed: {
+    evernote_new_link:function(){
+      const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
+      if(isMobilePhone){
+        return `intent://scan/#Intent;scheme=evernote;package=com.evernote;end`;
+      }else{
+        return `https://www.evernote.com/client/web`;
+      }
+    },
     disable_reload_select_ui: function () {
       return this.loading_message_show;
     },
