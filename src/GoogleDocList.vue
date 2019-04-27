@@ -144,7 +144,9 @@ export default Vue.extend({
     } else if (URLにcodeがある) {
       const code = RegExp.$1;
       this.auth_status = "アクセストークン更新中";
-      this.access_token_new_get(code).then(a => {
+      this.loading_message_show = true;
+      GoogleApi.Auth.getAccessTokenNewGet(code, this.redirect_url, this.クライアントID, this.クライアントシークレット).then(a => {
+        this.loading_message_show = false;
         save_refresh_token(a.refreshToken);
         document.location.href = this.redirect_url;
       }).catch(e => {
@@ -154,16 +156,16 @@ export default Vue.extend({
       });
     } else if (get_refresh_token() != "") {
       this.auth_status = "認証情報あり";
-      this.access_token_refresh().then(b => {
+      GoogleApi.Auth.getAccessTokenRefresh(get_refresh_token(), this.クライアントID, this.クライアントシークレット).then(b => {
         this.access_token = b.accessToken;
         this.reload_data();
-        EvernoteApi.DataRequest.loadData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
-          this.evernote_api_result = evernoteList;
-        });
       }).catch(e => {
         alert(`コードからアクセストークンとリフレッシュトークンを取得する事に失敗しました。\n${e}`);
         save_refresh_token("");
         document.location.href = this.redirect_url;
+      });
+      EvernoteApi.DataRequest.loadData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+        this.evernote_api_result = evernoteList;
       });
     } else {
       this.auth_status = "認証情報なし";
@@ -249,16 +251,6 @@ export default Vue.extend({
         "土曜日"
       ];
       return dateformat(new Date(dateString), "yyyy/mm/dd(ddd)HH:MM:ss");
-    },
-    access_token_refresh: async function () {
-      return await GoogleApi.Auth.getAccessTokenRefresh(get_refresh_token(), this.クライアントID, this.クライアントシークレット);
-    },
-    access_token_new_get: async function (code: string) {
-      this.loading_message_show = true;
-      return await GoogleApi.Auth.getAccessTokenNewGet(code, this.redirect_url, this.クライアントID, this.クライアントシークレット).then(r => {
-        this.loading_message_show = false;
-        return r
-      });
     },
     auth_start_push: function () {
       const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
