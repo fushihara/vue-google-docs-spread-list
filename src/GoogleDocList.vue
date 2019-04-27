@@ -96,7 +96,6 @@ import dateformat from "dateformat";
 import { GoogleApi } from "./google-api"
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub`
-type SortType = GoogleApi.SortType;
 type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
 type GoogleModifiedByMe = { modifiedByMe: false } | { modifiedByMe: true, modifiedByMeTime: string }
 type GoogleApiData = {
@@ -148,7 +147,7 @@ function isGoogleApiData(data: any): data is GoogleApiData {
   }
   return true;
 }
-function get_sort_option(): SortType {
+function get_sort_option(): GoogleApi.DataRequest.SortType {
   const saveRawValue = String(localStorage[`${vue_element_key}-sort-option`] || "");
   if (saveRawValue == "last_view_me" || saveRawValue == "last_update_me" || saveRawValue == "last_update" || saveRawValue == "createdTime" || saveRawValue == "title") {
     return saveRawValue;
@@ -264,7 +263,7 @@ export default Vue.extend({
     return {
       google_drive_api_result: { files: [] } as GoogleApiData,
       evernote_api_result: null as (EvernoteApiData | null),
-      sort_model: "last_view_me" as SortType,
+      sort_model: "last_view_me" as GoogleApi.DataRequest.SortType,
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
       loading_message_show: false,
@@ -434,11 +433,11 @@ export default Vue.extend({
       return dateformat(new Date(dateString), "yyyy/mm/dd(ddd)HH:MM:ss");
     },
     access_token_refresh: async function () {
-      return await GoogleApi.getAccessTokenRefresh(get_refresh_token(), this.クライアントID, this.クライアントシークレット);
+      return await GoogleApi.Auth.getAccessTokenRefresh(get_refresh_token(), this.クライアントID, this.クライアントシークレット);
     },
     access_token_new_get: async function (code: string) {
       this.loading_message_show = true;
-      return await GoogleApi.getAccessTokenNewGet(code, this.redirect_url, this.クライアントID, this.クライアントシークレット).then(r => {
+      return await GoogleApi.Auth.getAccessTokenNewGet(code, this.redirect_url, this.クライアントID, this.クライアントシークレット).then(r => {
         this.loading_message_show = false;
         return r
       });
@@ -463,14 +462,14 @@ export default Vue.extend({
         return;
       }
       this.loading_message_show = true;
-      document.location.href = GoogleApi.getAuthStartUrl({
+      document.location.href = GoogleApi.Auth.getAuthStartUrl({
         クライアントID: this.クライアントID,
         リダイレクトURI: this.redirect_url
       });
     },
     reload_data: function () {
       this.loading_message_show = true;
-      GoogleApi.getDataFromApi(this.sort_model, this.access_token)
+      GoogleApi.DataRequest.getDataFromApi(this.sort_model, this.access_token)
         .then(response =>
           response.json().then(json => {
             this.loading_message_show = false;
