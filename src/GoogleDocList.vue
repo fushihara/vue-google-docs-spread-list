@@ -5,6 +5,13 @@
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
       >Web Documents</div>
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
+      <select v-model="column_style_select" @change="save_column_option_value">
+        <option value="1">1行</option>
+        <option value="2">2行</option>
+        <option value="3">3行</option>
+        <option value="4">4行</option>
+        <option value="5">5行</option>
+      </select>
       <a
         href="https://docs.google.com/spreadsheets/create"
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
@@ -59,22 +66,27 @@
     </div>
     <ul
       v-if="auth_status == '認証情報あり'"
+      class="list-ul-parent"
+      :class="listUlClass"
       style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain;margin-bottom:0;"
       data-is-scroll-parent
     >
       <li
         v-for="item in filterd_list2"
         :key="item.link"
+        :style="listLIClass"
         style="display:flex;border-bottom:solid 1px silver;"
       >
         <a
           :href="item.link"
+          :title="item.title"
+          :alt="item.title"
           style="display:flex;align-items: center;width:100%;text-decoration:none;"
         >
           <div style="flex:0 0 25px;display: flex;justify-content: center;">
             <img v-bind:src="item.iconUrl" style="object-fit:contain;width:20px;height:20px;">
           </div>
-          <div style="flex:1 1 0;">
+          <div style="flex:1 1 0;" class="filename-parent">
             <div style="font-size:small;">{{ item.title }}</div>
             <div
               style="font-size:x-small;"
@@ -97,7 +109,7 @@ import { GoogleApi } from "./google-api"
 import { EvernoteApi } from "./evernote-api"
 import { SortType, ListItem, ListItemWithSortValue } from './shims-tsx';
 // localstorageに使う接頭語
-const vue_element_key = `h4hc25ub`
+const vue_element_key = `h4hc25ub` || `h4hc25ub-google-document-list`;
 function get_sort_option(): SortType {
   const saveRawValue = String(localStorage[`${vue_element_key}-sort-option`] || "");
   if (saveRawValue == "last_view_me" || saveRawValue == "last_update_me" || saveRawValue == "last_update" || saveRawValue == "createdTime" || saveRawValue == "title") {
@@ -114,6 +126,12 @@ function save_refresh_token(refresh_token: string) {
 function get_refresh_token() {
   return String(localStorage[`${vue_element_key}-refresh-token`] || "");
 }
+function getColumnOptionValue() {
+  return String(localStorage[`${vue_element_key}-column-option`] || "1")
+}
+function setColumnOptionValue(val: string) {
+  localStorage[`${vue_element_key}-column-option`] = val;
+}
 export default Vue.extend({
   mounted: function () {
     this.$el.addEventListener("ScrollTop", () => {
@@ -123,6 +141,7 @@ export default Vue.extend({
       }
     });
     this.sort_model = get_sort_option();
+    this.column_style_select = getColumnOptionValue();
     const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
     const URLにcodeがある = document.location.href.match(/\?code=(.+?)&/) != null;
     if (chrome拡張のapiを使う && chrome && chrome.identity && chrome.identity.getAuthToken) {
@@ -191,15 +210,34 @@ export default Vue.extend({
         googleDocsDocument: require("./images/icon-google-docs-doc.svg"),
         googleDocsSpread: require("./images/icon-google-docs-spread.svg"),
         evernote: require("./images/icon-evernote.svg")
-      }
+      },
+      column_style_select: "1"
     };
   },
   computed: {
-    evernote_new_link:function(){
+    listUlClass: function () {
+      if (this.column_style_select != "1") {
+        return "multi-columns";
+      } else {
+        return "";
+      }
+    },
+    listLIClass: function () {
+      const v = Number(this.column_style_select || "0");
+      if (this.column_style_select == "1") {
+        return {}
+      } else if (!Number.isNaN(v) && 2 <= v) {
+        const p = 100 / v;
+        return { "flex": ` 0 0 ${p}%` };
+      } else {
+        return {}
+      }
+    },
+    evernote_new_link: function () {
       const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
-      if(isMobilePhone){
+      if (isMobilePhone) {
         return `intent://scan/#Intent;scheme=evernote;package=com.evernote;end`;
-      }else{
+      } else {
         return `https://www.evernote.com/client/web`;
       }
     },
@@ -292,12 +330,38 @@ export default Vue.extend({
         save_sort_option(this.sort_model);
         this.google_drive_api_result = json;
       });
+    },
+    save_column_option_value:function(){
+      setColumnOptionValue(this.column_style_select);
     }
   }
 });
 </script>
 
 <style lang="scss" scoped>
+* {
+  box-sizing: border-box;
+}
+.list-ul-parent.multi-columns {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  display: flex;
+  > li {
+    /* flex: 0 0 var(--my-color, 50%); これはcomputed.listLIClass で書き込む*/
+    border-right: 1px solid silver;
+    overflow: hidden;
+    .filename-parent {
+      overflow: hidden;
+      > div {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
 ul {
   padding-left: 0;
 }

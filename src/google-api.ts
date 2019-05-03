@@ -40,7 +40,6 @@ export namespace GoogleApi {
             }
           });
         });
-
     }
     export async function getAccessTokenRefresh(リフレッシュトークン: string, クライアントID: string, クライアントシークレット: string): Promise<{ accessToken: string, expiresInSecond: number }> {
       const postValues = [];
