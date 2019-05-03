@@ -355,7 +355,7 @@ export default Vue.extend({
       const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
       if (tateMatch) {
         const el = this.$el.querySelector<HTMLLIElement>("[data-is-scroll-parent]")!;
-        el.scrollLeft += event.deltaY/2;
+        el.scrollLeft += event.deltaY / 2;
       }
     }
   }
@@ -376,6 +376,7 @@ export default Vue.extend({
   }
   &.tate {
     flex-direction: column;
+    justify-content: flex-start;
   }
   > li {
     /* flex: 0 0 var(--my-color, 50%); これはcomputed.listLIClass で書き込む*/
