@@ -7,10 +7,15 @@
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
       <select v-model="column_style_select" @change="save_column_option_value">
         <option value="1">1行</option>
-        <option value="2">2行</option>
-        <option value="3">3行</option>
-        <option value="4">4行</option>
-        <option value="5">5行</option>
+        <option value="yoko-2">横2列</option>
+        <option value="yoko-3">横3列</option>
+        <option value="yoko-4">横4列</option>
+        <option value="yoko-5">横5列</option>
+        <option value="yoko-6">横6列</option>
+        <option value="tate-250px">縦250px</option>
+        <option value="tate-300px">縦300px</option>
+        <option value="tate-400px">縦400px</option>
+        <option value="tate-500px">縦500px</option>
       </select>
       <a
         href="https://docs.google.com/spreadsheets/create"
@@ -70,6 +75,7 @@
       :class="listUlClass"
       style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain;margin-bottom:0;"
       data-is-scroll-parent
+      @wheel="listWheelEvent"
     >
       <li
         v-for="item in filterd_list2"
@@ -216,21 +222,32 @@ export default Vue.extend({
   },
   computed: {
     listUlClass: function () {
-      if (this.column_style_select != "1") {
-        return "multi-columns";
+      const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
+      const yokoMatch = this.column_style_select.match(/yoko-(\d+)/);
+      if (this.column_style_select == "1") {
+        return "";
+      } else if (tateMatch) {
+        return ["multi-columns", "tate"];
+      } else if (yokoMatch) {
+        return ["multi-columns", "yoko"];
       } else {
         return "";
       }
     },
     listLIClass: function () {
-      const v = Number(this.column_style_select || "0");
+      const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
+      const yokoMatch = this.column_style_select.match(/yoko-(\d+)/);
       if (this.column_style_select == "1") {
         return {}
-      } else if (!Number.isNaN(v) && 2 <= v) {
-        const p = 100 / v;
+      } else if (yokoMatch && 2 <= Number(yokoMatch[1])) {
+        const p = 100 / Number(yokoMatch[1]);
         return { "flex": ` 0 0 ${p}%` };
+      } else if (tateMatch) {
+        return {
+          width: `${tateMatch[1]}px`
+        }
       } else {
-        return {}
+        return {};
       }
     },
     evernote_new_link: function () {
@@ -331,8 +348,15 @@ export default Vue.extend({
         this.google_drive_api_result = json;
       });
     },
-    save_column_option_value:function(){
+    save_column_option_value: function () {
       setColumnOptionValue(this.column_style_select);
+    },
+    listWheelEvent: function (event: WheelEvent) {
+      const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
+      if (tateMatch) {
+        const el = this.$el.querySelector<HTMLLIElement>("[data-is-scroll-parent]")!;
+        el.scrollLeft += event.deltaY/2;
+      }
     }
   }
 });
@@ -343,11 +367,16 @@ export default Vue.extend({
   box-sizing: border-box;
 }
 .list-ul-parent.multi-columns {
-  flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
   display: flex;
+  &.yoko {
+    flex-direction: row;
+  }
+  &.tate {
+    flex-direction: column;
+  }
   > li {
     /* flex: 0 0 var(--my-color, 50%); これはcomputed.listLIClass で書き込む*/
     border-right: 1px solid silver;
