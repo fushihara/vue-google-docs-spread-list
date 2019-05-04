@@ -5,7 +5,7 @@
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
       >Web Documents</div>
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
-      <select v-model="column_style_select" @change="save_column_option_value">
+      <select v-model="column_style_select" @change="save_column_option_value" style="height: 100%;">
         <option value="1">1行</option>
         <option value="yoko-2">横2列</option>
         <option value="yoko-3">横3列</option>
@@ -115,7 +115,7 @@ import { GoogleApi } from "./google-api"
 import { EvernoteApi } from "./evernote-api"
 import { SortType, ListItem, ListItemWithSortValue } from './shims-tsx';
 // localstorageに使う接頭語
-const vue_element_key = `h4hc25ub` || `h4hc25ub-google-document-list`;
+const vue_element_key = `h4hc25ub-google-document-list`;
 function get_sort_option(): SortType {
   const saveRawValue = String(localStorage[`${vue_element_key}-sort-option`] || "");
   if (saveRawValue == "last_view_me" || saveRawValue == "last_update_me" || saveRawValue == "last_update" || saveRawValue == "createdTime" || saveRawValue == "title") {
