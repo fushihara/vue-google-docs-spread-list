@@ -70,7 +70,7 @@
       </select>
     </div>
     <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
-      <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">絞り込み検索</div>
+      <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">検索</div>
       <input type="search" style="flex:1 1 0;" v-model="filter_keyword" placeholder="絞り込みキーワード">
     </div>
     <ul
