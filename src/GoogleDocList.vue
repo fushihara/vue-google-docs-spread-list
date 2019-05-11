@@ -373,6 +373,7 @@ export default Vue.extend({
       if (tateMatch) {
         const el = this.$el.querySelector<HTMLLIElement>("[data-is-scroll-parent]")!;
         el.scrollLeft += event.deltaY / 2;
+        event.preventDefault();
       }
     }
   }
