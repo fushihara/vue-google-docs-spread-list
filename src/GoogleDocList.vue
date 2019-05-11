@@ -5,7 +5,11 @@
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
       >Web Documents</div>
       <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
-      <select v-model="column_style_select" @change="save_column_option_value" style="height: 100%;">
+      <select
+        v-model="column_style_select"
+        @change="save_column_option_value"
+        style="height: 100%;"
+      >
         <option value="1">1行</option>
         <option value="yoko-2">横2列</option>
         <option value="yoko-3">横3列</option>
@@ -140,15 +144,28 @@ function setColumnOptionValue(val: string) {
 }
 export default Vue.extend({
   mounted: function () {
-    this.$el.addEventListener("ScrollTop", () => {
+    this.$el.addEventListener("ScrollTop", () => { // emitに出来るかも
       const el = this.$el.querySelector("[data-is-scroll-parent]");
       if (el) {
         el.scrollTop = 0
       }
     });
+    this.$ssrContext;
+    this.$options;
+    this.$parent;
+    this.$root;
+    this.$children;
+    this.$refs;
+    this.$slots;
+    this.$scopedSlots;
+    this.$isServer;
+    this.$data;
+    this.$listeners;
+    this.$destroy;
+    this.$createElement;
     this.sort_model = get_sort_option();
     this.column_style_select = getColumnOptionValue();
-    const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
+    const chrome拡張のapiを使う = !!this.useChromeIdentityiApi;
     const URLにcodeがある = document.location.href.match(/\?code=(.+?)&/) != null;
     if (chrome拡張のapiを使う && chrome && chrome.identity && chrome.identity.getAuthToken) {
       // まずはトークンが取得出来るかチェック
@@ -161,7 +178,7 @@ export default Vue.extend({
           this.auth_status = "認証情報あり";
           this.access_token = token;
           this.reload_data();
-          EvernoteApi.DataRequest.loadData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+          EvernoteApi.DataRequest.loadData(this.evernoteApiUrl).then(evernoteList => {
             this.evernote_api_result = evernoteList;
           });
         }
@@ -170,26 +187,26 @@ export default Vue.extend({
       const code = RegExp.$1;
       this.auth_status = "アクセストークン更新中";
       this.loading_message_show = true;
-      GoogleApi.Auth.getAccessTokenNewGet(code, this.redirect_url, this.クライアントID, this.クライアントシークレット).then(a => {
+      GoogleApi.Auth.getAccessTokenNewGet(code, this.googleApiDataRedirectUrl, this.googleApiDataClientId, this.googleApiDataClientSecret).then(a => {
         this.loading_message_show = false;
         save_refresh_token(a.refreshToken);
-        document.location.href = this.redirect_url;
+        document.location.href = this.googleApiDataRedirectUrl;
       }).catch(e => {
         alert(`コードからアクセストークンとリフレッシュトークンを取得する事に失敗しました。\n${e}`);
         save_refresh_token("");
-        document.location.href = this.redirect_url;
+        document.location.href = this.googleApiDataRedirectUrl;
       });
     } else if (get_refresh_token() != "") {
       this.auth_status = "認証情報あり";
-      GoogleApi.Auth.getAccessTokenRefresh(get_refresh_token(), this.クライアントID, this.クライアントシークレット).then(b => {
+      GoogleApi.Auth.getAccessTokenRefresh(get_refresh_token(), this.googleApiDataClientId, this.googleApiDataClientSecret).then(b => {
         this.access_token = b.accessToken;
         this.reload_data();
       }).catch(e => {
         alert(`コードからアクセストークンとリフレッシュトークンを取得する事に失敗しました。\n${e}`);
         save_refresh_token("");
-        document.location.href = this.redirect_url;
+        document.location.href = this.googleApiDataRedirectUrl;
       });
-      EvernoteApi.DataRequest.loadData(this.evernoteのドキュメント一覧のapi).then(evernoteList => {
+      EvernoteApi.DataRequest.loadData(this.evernoteApiUrl).then(evernoteList => {
         this.evernote_api_result = evernoteList;
       });
     } else {
@@ -197,11 +214,11 @@ export default Vue.extend({
     }
   },
   props: {
-    redirect_url: { type: String, required: true },
-    クライアントID: { type: String, required: true },
-    クライアントシークレット: { type: String, required: true },
-    chromeのidentityiAPIを使う: { type: Boolean, required: true },
-    evernoteのドキュメント一覧のapi: { type: String, required: false }
+    googleApiDataRedirectUrl: { type: String, required: false },
+    googleApiDataClientId: { type: String, required: false },
+    googleApiDataClientSecret: { type: String, required: false },
+    useChromeIdentityiApi: { type: Boolean, required: false },
+    evernoteApiUrl: { type: String, required: false },
   },
   data: function () {
     return {
@@ -316,7 +333,7 @@ export default Vue.extend({
       return dateformat(new Date(dateString), "yyyy/mm/dd(ddd)HH:MM:ss");
     },
     auth_start_push: function () {
-      const chrome拡張のapiを使う = !!this.chromeのidentityiAPIを使う;
+      const chrome拡張のapiを使う = !!this.useChromeIdentityiApi;
       if (chrome拡張のapiを使う && chrome && chrome.identity && chrome.identity.getAuthToken) {
         // まずはトークンが取得出来るかチェック
         this.loading_message_show = true;
@@ -336,8 +353,8 @@ export default Vue.extend({
       }
       this.loading_message_show = true;
       document.location.href = GoogleApi.Auth.getAuthStartUrl({
-        クライアントID: this.クライアントID,
-        リダイレクトURI: this.redirect_url
+        クライアントID: this.googleApiDataClientId,
+        リダイレクトURI: this.googleApiDataRedirectUrl
       });
     },
     reload_data: function () {

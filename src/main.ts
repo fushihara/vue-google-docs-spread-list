@@ -1,11 +1,10 @@
 import GoogleDocList from "./GoogleDocList.vue";
 const v2 = new GoogleDocList<object, { set_callback: (cb: () => void) => void }>({
   propsData: {
-    redirect_url: String(process.env.VUE_APP_CALLBACK_URL || ""),
-    クライアントID: String(process.env.VUE_APP_API_CLIENT_ID || ""),
-    クライアントシークレット: String(process.env.VUE_APP_API_CLIENT_SECRET || ""),
-    chromeのidentityiAPIを使う: !!process.env.VUE_APP_USE_CHROME_IDENTITY_API,
-    evernoteのドキュメント一覧のapi : String(process.env.VUE_APP_EVERNOTE_LIST_API || "")
+    googleApiDataRedirectUrl: String(process.env.VUE_APP_CALLBACK_URL || ""),
+    googleApiDataClientId: String(process.env.VUE_APP_API_CLIENT_ID || ""),
+    googleApiDataClientSecret: String(process.env.VUE_APP_API_CLIENT_SECRET || ""),
+    evernoteApiUrl : String(process.env.VUE_APP_EVERNOTE_LIST_API || "")
   }
 });
-v2.$mount(String(process.env.VUE_APP_MOUNT_QUERY || ""));
+v2.$mount("#app"); // main.tsはbuild appでしか使われないから、他のコンポーネントの事を考える必要は一切無いので#app固定
