@@ -13,7 +13,7 @@ module.exports = {
         chunkModules: true,
       }) */
     ],
-    //devtool: "cheap-module-source-map", // vue-cli-service build --mode development で出力したjsでeval("ソースコード")の部分を無くす時はon
+    devtool: "cheap-module-source-map", // vue-cli-service build --mode development で出力したjsでeval("ソースコード")の部分を無くす時はon
   },
   pages: {
     index: {
@@ -23,6 +23,6 @@ module.exports = {
     }
   },
   filenameHashing: true,
-  publicPath: "/", // 通常は「/」
-  outputDir: "build-result"
+  publicPath: process.env.PUBLIC_PATH ||  "/", // 通常は「/」 servの時のURLと、build app の時に使われるっぽい
+  outputDir: "build-result/unused" // buildの時、引数で指定されるので未使用のはず
 }
