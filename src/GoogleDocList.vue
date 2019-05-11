@@ -346,7 +346,7 @@ export default Vue.extend({
     },
     reload_data: function () {
       this.loading_message_show = true;
-      GoogleApi.DataRequest.getDataFromApi(this.sort_model, this.access_token).then(json => {
+      GoogleApi.DataRequest.getDataFromApi("", this.sort_model, this.access_token).then(json => {
         this.loading_message_show = false;
         save_sort_option(this.sort_model);
         this.google_drive_api_result = json;

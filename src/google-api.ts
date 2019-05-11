@@ -70,7 +70,7 @@ export namespace GoogleApi {
       files: ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe)[]
     };
 
-    export async function getDataFromApi(sortType: SortType, accessToken: string): Promise<GoogleApiData> {
+    export async function getDataFromApi(searchKeyword: string, sortType: SortType, accessToken: string): Promise<GoogleApiData> {
       let orderBy = "";
       switch (sortType) {
         case "last_view_me": orderBy = "viewedByMeTime desc"; break;
@@ -79,11 +79,17 @@ export namespace GoogleApi {
         case "title": orderBy = "name"; break;
         case "createdTime": orderBy = "createdTime desc"; break;
       }
+      const qQueries = [];
+      if (searchKeyword.trim() != "") {
+        qQueries.push(`fullText contains '${searchKeyword.trim().replace(/'/g, "\\'")}'`)
+      }
+      qQueries.push("trashed = false");
+      qQueries.push("(mimeType = 'application/vnd.google-apps.spreadsheet' or mimeType = 'application/vnd.google-apps.document')");
       return await fetch(
         `https://www.googleapis.com/drive/v3/files?` +
         [
           "orderBy=" + encodeURIComponent(orderBy),
-          "q=" + encodeURIComponent("trashed = false and (mimeType = 'application/vnd.google-apps.spreadsheet' or mimeType = 'application/vnd.google-apps.document')"),
+          "q=" + encodeURIComponent(qQueries.join(" and ")),
           "fields=" + encodeURIComponent("files(kind,id,name,mimeType,iconLink,viewedByMe,viewedByMeTime,createdTime,modifiedTime,modifiedByMeTime,modifiedByMe)"),
           "pageSize=1000",
         ].join("&"),
