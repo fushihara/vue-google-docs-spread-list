@@ -117,7 +117,7 @@ import Vue from "vue";
 import dateformat from "dateformat";
 import { GoogleApi } from "./google-api"
 import { EvernoteApi } from "./evernote-api"
-import { SortType, ListItem, ListItemWithSortValue } from './shims-tsx';
+import { SortType, ListItem, ListItemWithSortValue } from './d.ts/shims-tsx';
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub-google-document-list`;
 function get_sort_option(): SortType {
