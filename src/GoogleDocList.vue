@@ -150,19 +150,6 @@ export default Vue.extend({
         el.scrollTop = 0
       }
     });
-    this.$ssrContext;
-    this.$options;
-    this.$parent;
-    this.$root;
-    this.$children;
-    this.$refs;
-    this.$slots;
-    this.$scopedSlots;
-    this.$isServer;
-    this.$data;
-    this.$listeners;
-    this.$destroy;
-    this.$createElement;
     this.sort_model = get_sort_option();
     this.column_style_select = getColumnOptionValue();
     const chrome拡張のapiを使う = !!this.useChromeIdentityiApi;
