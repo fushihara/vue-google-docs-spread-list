@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --mode production",
-    "build-development": "vue-cli-service build --mode development"
+    "build:dev-app-ts": "vue-cli-service build --target app --mode development                                                   --dest \"./build-result/dev-app-ts\"  \"./src/main.ts\"",
+    "build:dev-lib-vue": "vue-cli-service build --target lib --mode development --name GoogleDocList   --filename google-doc-list --dest \"./build-result/dev-lib-vue\" \"./src/GoogleDocList.vue\"",
+    "build:dev-wc-vue": "vue-cli-service build --target wc  --mode development --name google-doc-list                            --dest \"./build-result/dev-wc--vue\" \"./src/GoogleDocList.vue\"",
+    "build:pro-app-ts": "vue-cli-service build --target app --mode production                                                    --dest \"./build-result/pro-app-ts\"  \"./src/main.ts\"",
+    "build:pro-lib-vue": "vue-cli-service build --target lib --mode production  --name GoogleDocList   --filename google-doc-list --dest \"./build-result/pro-lib-vue\" \"./src/GoogleDocList.vue\"",
+    "build:pro-wc-vue": "vue-cli-service build --target wc  --mode production  --name google-doc-list                            --dest \"./build-result/pro-wc--vue\" \"./src/GoogleDocList.vue\"",
+    "build":"npm run build:dev-app-ts && npm run build:dev-lib-vue && npm run build:dev-wc-vue && npm run build:pro-app-ts && npm run build:pro-lib-vue && npm run build:pro-wc-vue"
   },
   "dependencies": {
     "dateformat": "^3.0.3",
