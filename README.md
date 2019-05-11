@@ -1,46 +1,40 @@
 # vue google doc list
 
-GoogleDriveAPIを使って、documentとspreadsheetsを一覧表示する。
+GoogleDriveのdocumentとspreadsheets。それにevernoteのドキュメントを一つにまとめて一覧表示するvueコンポーネントです。
 
-公式のアプリを使うとdocumentの一覧とspreadsheetsの一覧が別に表示されるが、このvueコンポーネントを使うと一覧表示出来る。
+GoogleDriveのドキュメント一覧はclient idとsecretを使うAPI経由での取得と、chrome.identity.getAuthToken APIを使うchrome拡張内で使う方法をサポート。
+evernoteはSDKの都合上サーバ側に設置するapiから取得します。
 
-通常のwebページに加えて、chromeの拡張ページ内でも使う事が出来る。chromeの拡張ページはURLがchrome-extension:// で始まるが、GoogleAPIで認証後のコールバックにはhttp もしくはhttpsで始まるURLしか指定出来ないので別の仕組みが必要。
+一覧は縦表示と横表示可能。横表示の時も、マウスホイールの上下スクロールで左右へのスクロールが可能です。
 
-![プレビュー](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-03-27-03-21-41.png)
+![縦表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-05-12-00-03-18.png)
+
+![横表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-05-12-00-03-23.png)
+
 
 # git cloneした後に実行出来るコマンド一覧
 
-## 開発用。サーバを起動して確認出来る
+## 開発用
+サーバを起動して確認出来る
 - npm run serve
 
-## プロダクション用。/build-result/にhtmlとjsが作られる
+## プロダクション用
+/build-result/の中に各種ファイルが作成される
 - npm run build
 
-## 使用しているモジュールが作成したjsファイルでどのくらいの容量を使っているのか確認する
--  ./node_modules/.bin/webpack-bundle-analyzer.cmd ./build-result/stats.json
+# vueコンポーネントのpropの値
 
-# パラメータ指定方法
-
-`.env`からパラメータを指定する。コンポーネントを使う場所がhttp/httpsで始まるか、chrome-extensionで始まるかで指定方法が異なる。
-
-## 共通のパラメータ
-
-- VUE_APP_MOUNT_QUERY
-  - vueをマウントするエレメントID。`#dom-id` の様な値を指定。
-
-## http/httpsで始まる場所
-
-- VUE_APP_CALLBACK_URL
-   - コールバックURL。認証後に戻ってくるページのアドレス。GoogleAPIのコンソールで完全一致の値を指定する必要あり。
-- VUE_APP_API_CLIENT_ID
-   - クライアントID。`123456789-xxxxxxxx3sgsv73cqd4kdhuc1xhyjgum.apps.googleusercontent.com`の様な値
-- VUE_APP_API_CLIENT_SECRET
-   - クライアントシークレット。`XXXXXXzze23o08myhpdm0waw`のような値。
-
-## chrome-extensionで始まる場所
-
-- VUE_APP_USE_CHROME_IDENTITY_API
-   - 1 を指定する。
+```
+new GoogleDocList<object, { set_callback: (cb: () => void) => void }>({
+  propsData: {
+    googleApiDataRedirectUrl:"https://example.com",//コールバックURL。認証後に戻ってくるページのアドレス。GoogleAPIのコンソールで完全一致の値を指定する必要あり。
+    googleApiDataClientId:"123456789-xxxxxxxx3sgsv73cqd4kdhuc1xhyjgum.apps.googleusercontent.com",//googldDriveApiのclientID
+    googleApiDataClientSecret: "XXXXXXzze23o08myhpdm0waw",//googleDriveApiのClientSecret
+    useChromeIdentityiApi:false,//googleDriveApiではなく、chrome.identity.getAuthToken APIを使うかどうか
+    evernoteApiUrl : "https://example.com/evernote?token=xxxxxxxxx" // evernote apiのURL
+  }
+});
+```
 
 # google apiの準備方法
 
