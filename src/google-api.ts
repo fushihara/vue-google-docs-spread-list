@@ -1,4 +1,4 @@
-import { SortType, ListItemWithSortValue } from './shims-tsx';
+import { SortType, ListItemWithSortValue } from './d.ts/shims-tsx';
 
 export namespace GoogleApi {
   export namespace Auth {

@@ -1,4 +1,4 @@
-import { ListItemWithSortValue, SortType } from './shims-tsx';
+import { ListItemWithSortValue, SortType } from './d.ts/shims-tsx';
 
 export namespace EvernoteApi {
   export namespace DataRequest {
