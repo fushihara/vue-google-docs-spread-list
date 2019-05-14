@@ -81,15 +81,17 @@ export namespace GoogleApi {
         case "createdTime": orderBy = "createdTime desc"; break;
       }
       const qQueries = [];
+      let hasFulltextSearch = false;
       if (searchKeyword.trim() != "") {
         qQueries.push(`fullText contains '${searchKeyword.trim().replace(/'/g, "\\'")}'`)
+        hasFulltextSearch = true;
       }
       qQueries.push("trashed = false");
       qQueries.push("(mimeType = 'application/vnd.google-apps.spreadsheet' or mimeType = 'application/vnd.google-apps.document')");
       return await fetch(
         `https://www.googleapis.com/drive/v3/files?` +
         [
-          "orderBy=" + encodeURIComponent(orderBy),
+          hasFulltextSearch ? "" : ("orderBy=" + encodeURIComponent(orderBy)),
           "q=" + encodeURIComponent(qQueries.join(" and ")),
           "fields=" + encodeURIComponent("files(kind,id,name,mimeType,iconLink,viewedByMe,viewedByMeTime,createdTime,modifiedTime,modifiedByMeTime,modifiedByMe)"),
           "pageSize=1000",
