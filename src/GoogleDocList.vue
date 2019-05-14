@@ -391,10 +391,13 @@ export default Vue.extend({
   display: flex;
   &.yoko {
     flex-direction: row;
+    align-content: flex-start;
+    justify-content: flex-start;
   }
   &.tate {
     flex-direction: column;
     justify-content: flex-start;
+    align-content: flex-start;
   }
   > li {
     /* flex: 0 0 var(--my-color, 50%); これはcomputed.listLIClass で書き込む*/
