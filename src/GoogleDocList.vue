@@ -165,7 +165,13 @@ export default Vue.extend({
           this.auth_status = "認証情報あり";
           this.access_token = token;
           this.reload_data();
-          EvernoteApi.DataRequest.loadData(this.evernoteApiUrl).then(evernoteList => {
+          EvernoteApi.DataRequest.loadData({
+            url: this.evernoteApiUrl,
+            developer_token: this.evernoteApiDeveloperToken,
+            words: "",
+            ascending: false,
+            order: "updated"
+          }).then(evernoteList => {
             this.evernote_api_result = evernoteList;
           });
         }
@@ -193,7 +199,13 @@ export default Vue.extend({
         save_refresh_token("");
         document.location.href = this.googleApiDataRedirectUrl;
       });
-      EvernoteApi.DataRequest.loadData(this.evernoteApiUrl).then(evernoteList => {
+      EvernoteApi.DataRequest.loadData({
+        url: this.evernoteApiUrl,
+        developer_token: this.evernoteApiDeveloperToken,
+        words: "",
+        ascending: false,
+        order: "updated"
+      }).then(evernoteList => {
         this.evernote_api_result = evernoteList;
       });
     } else {
@@ -206,6 +218,7 @@ export default Vue.extend({
     googleApiDataClientSecret: { type: String, required: false },
     useChromeIdentityiApi: { type: Boolean, required: false },
     evernoteApiUrl: { type: String, required: false },
+    evernoteApiDeveloperToken: { type: String, required: false },
   },
   data: function () {
     return {

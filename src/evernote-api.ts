@@ -21,11 +21,16 @@ export namespace EvernoteApi {
       notebookName: string
       notebookGuid: string
     }
-    export async function loadData(url: string): Promise<EvernoteApiData | null> {
-      if (url == "") {
+    export async function loadData(args: { url: string, words: string, ascending: boolean, order: "created" | "updated" | "title", developer_token: string, abortSignal?: AbortSignal }): Promise<EvernoteApiData | null> {
+      if (args.url == "") {
         return null;
       }
-      const json = await fetch(url).then(response => response.json());
+      const urlParams = new URLSearchParams();
+      urlParams.append("developer_token", args.developer_token);
+      urlParams.append("words", args.words);
+      urlParams.append("order", args.order);
+      urlParams.append("ascending", args.ascending ? "1" : "");
+      const json = await fetch(`${args.url}?${urlParams.toString()}`, { signal: args.abortSignal }).then(response => response.json());
       if (json === null || json === undefined) { return null; }
       if (typeof json !== "object") { return null; }
       if (!Array.isArray(json.noteBooks)) { return null; }
