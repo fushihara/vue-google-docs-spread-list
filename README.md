@@ -85,3 +85,7 @@ https://developers.google.com/drive/api/v3/about-auth?hl=JA
 
 https://developer.chrome.com/extensions/identity#method-getAccounts
 
+## オープンソース
+
+- 読み込み中svgアニメーション作成
+  - https://loading.io/

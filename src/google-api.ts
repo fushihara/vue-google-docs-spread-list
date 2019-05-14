@@ -1,4 +1,4 @@
-import { SortType, ListItemWithSortValue } from './d.ts/shims-tsx';
+import { SortType, ListItem } from './d.ts/shims-tsx';
 
 export namespace GoogleApi {
   export namespace Auth {
@@ -66,11 +66,12 @@ export namespace GoogleApi {
   export namespace DataRequest {
     export type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
     export type GoogleModifiedByMe = { modifiedByMe: false } | { modifiedByMe: true, modifiedByMeTime: string }
+    export type GoogleApiFileData = ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe);
     export type GoogleApiData = {
-      files: ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe)[]
+      files: GoogleApiFileData[]
     };
 
-    export async function getDataFromApi(searchKeyword: string, sortType: SortType, accessToken: string): Promise<GoogleApiData> {
+    export async function getDataFromApi(searchKeyword: string, sortType: SortType, accessToken: string, abortSignal?: AbortSignal): Promise<GoogleApiData> {
       let orderBy = "";
       switch (sortType) {
         case "last_view_me": orderBy = "viewedByMeTime desc"; break;
@@ -97,7 +98,8 @@ export namespace GoogleApi {
           headers: {
             Accept: "application/json",
             Authorization: `Bearer ${accessToken}`
-          }
+          },
+          signal: abortSignal
         }
       ).then(request => request.json().then<GoogleApiData>(json => {
         if (isGoogleApiData(json)) {
@@ -127,9 +129,9 @@ export namespace GoogleApi {
     }
   }
   export namespace DataFilter {
-    export function convertDatas(apiValue: DataRequest.GoogleApiData, sortType: SortType, iconImage: { doc: string, spread: string }): ListItemWithSortValue {
-      const result: ListItemWithSortValue = [];
-      apiValue.files.forEach(a => {
+    export function convertDatas(apiValue: DataRequest.GoogleApiFileData[], sortType: SortType, iconImage: { doc: string, spread: string }): ListItem[] {
+      const result: ListItem[] = [];
+      apiValue.forEach(a => {
         let link = "";
         let iconImageUrl = "";
         if (a.mimeType === "application/vnd.google-apps.document") {

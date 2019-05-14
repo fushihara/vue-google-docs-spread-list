@@ -13,6 +13,6 @@ export type ListItem = {
   timestamp: {
     value: Date,
     label: string
-  }
+  },
+  sortValue: string 
 };
-export type ListItemWithSortValue = (ListItem & { sortValue: string })[];

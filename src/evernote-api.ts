@@ -1,4 +1,4 @@
-import { ListItemWithSortValue, SortType } from './d.ts/shims-tsx';
+import { SortType, ListItem } from './d.ts/shims-tsx';
 
 export namespace EvernoteApi {
   export namespace DataRequest {
@@ -61,7 +61,7 @@ export namespace EvernoteApi {
   }
   export namespace DataFilter {
     export function convertDatas(apiValue: EvernoteApi.DataRequest.EvernoteApiData, sortType: SortType, iconUrl: string, isMobileLink: boolean) {
-      const result: ListItemWithSortValue = [];
+      const result: ListItem[] = [];
       const evernoteUserData = apiValue.userData;
       apiValue.noteBooks.forEach(a => {
         let timestamp: Date;

@@ -72,6 +72,22 @@
     <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">検索</div>
       <input type="search" style="flex:1 1 0;" v-model="filter_keyword" placeholder="絞り込みキーワード">
+      <div v-if="text_search.mode=='検索中'" style="flex:0 0 auto;display: flex;align-items: center;">
+        <img :src="icon_image.loading" style="width:20px;object-fit:contain;">
+        全文検索中
+      </div>
+      <div
+        v-if="text_search.mode=='本文検索結果表示指示待機中'"
+        style="flex:0 0 auto;display: flex;align-items: center;"
+      >
+        <button @click="show_text_search_result">全文検索結果表示 {{ text_search.new_items.google_drive }}個</button>
+      </div>
+      <div
+        v-if="text_search.mode=='本文検索結果表示中'"
+        style="flex:0 0 auto;display: flex;align-items: center;"
+      >全文検索結果表示中</div>
+      <div v-show="false" style="flex:0 0 auto;display: flex;align-items: center;">Google全文検索エラー</div>
+      <div v-show="false" style="flex:0 0 auto;display: flex;align-items: center;">Evernote全文検索エラー</div>
     </div>
     <ul
       v-if="auth_status == '認証情報あり'"
@@ -117,7 +133,8 @@ import Vue from "vue";
 import dateformat from "dateformat";
 import { GoogleApi } from "./google-api"
 import { EvernoteApi } from "./evernote-api"
-import { SortType, ListItem, ListItemWithSortValue } from './d.ts/shims-tsx';
+import { KeywordFilter } from "./KeywordFilter"
+import { SortType, ListItem } from './d.ts/shims-tsx';
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub-google-document-list`;
 function get_sort_option(): SortType {
@@ -143,6 +160,8 @@ function setColumnOptionValue(val: string) {
   localStorage[`${vue_element_key}-column-option`] = val;
 }
 export default Vue.extend({
+  components: {
+  },
   mounted: function () {
     this.$el.addEventListener("ScrollTop", () => { // emitに出来るかも
       const el = this.$el.querySelector("[data-is-scroll-parent]");
@@ -222,7 +241,7 @@ export default Vue.extend({
   },
   data: function () {
     return {
-      google_drive_api_result: { files: [] } as GoogleApi.DataRequest.GoogleApiData,
+      google_drive_api_result: [] as GoogleApi.DataRequest.GoogleApiFileData[],
       evernote_api_result: null as (EvernoteApi.DataRequest.EvernoteApiData | null),
       sort_model: "last_view_me" as SortType,
       auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
@@ -232,10 +251,57 @@ export default Vue.extend({
       icon_image: {
         googleDocsDocument: require("./images/icon-google-docs-doc.svg"),
         googleDocsSpread: require("./images/icon-google-docs-spread.svg"),
-        evernote: require("./images/icon-evernote.svg")
+        evernote: require("./images/icon-evernote.svg"),
+        loading: require("./images/loading.svg"),
       },
-      column_style_select: "1"
+      column_style_select: "1",
+      text_search: { "mode": "検索なし" } as { "mode": "検索なし" } |
+      { "mode": "検索中", "settimeout_timer_id": number, "api_abort_controller": AbortController } |
+      { "mode": "本文検索結果表示指示待機中", api_result: { google_drive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) }, new_items: { google_drive: number, evernote: number } } |
+      { "mode": "本文検索結果表示中", api_result: { google_drive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) } }
     };
+  },
+  watch: {
+    filter_keyword: function (newVal, oldVal) {
+      if (this.text_search.mode == "検索中") {
+        clearTimeout(this.text_search.settimeout_timer_id);
+        this.text_search.api_abort_controller.abort();
+      } else if (this.text_search.mode == "本文検索結果表示指示待機中" || this.text_search.mode == "本文検索結果表示中") {
+        this.text_search.api_result.google_drive = [];
+        this.text_search.api_result.evernote = null;
+      }
+      const abortController = new AbortController();
+      const settimeout_timer_id = setTimeout(() => {
+        this.text_search_start(abortController.signal).then(a => {
+          const gooleDriveFiles = a[0] ? a[0].files : [];
+          const evernoteApiData = a[1] ? a[1] : null;
+          const currentItemUrls = this.filterd_list2.map(a => a.link);
+          const sortType = this.sort_model;
+          const googleDriveNewItemCount = GoogleApi.DataFilter.convertDatas(gooleDriveFiles, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
+            .map(a => a.link)
+            .filter(a => currentItemUrls.includes(a) == false).length;
+          const evernoteNewItemCount = (evernoteApiData ? EvernoteApi.DataFilter.convertDatas(evernoteApiData, sortType, this.icon_image.evernote, false) : [])
+            .map(a => a.link)
+            .filter(a => currentItemUrls.includes(a) == false).length;
+          this.text_search = {
+            mode: "本文検索結果表示指示待機中",
+            api_result: {
+              google_drive: gooleDriveFiles,
+              evernote: evernoteApiData
+            },
+            new_items: {
+              google_drive: googleDriveNewItemCount,
+              evernote: evernoteNewItemCount
+            }
+          };
+        })
+      }, 1000);
+      this.text_search = {
+        mode: "検索中",
+        settimeout_timer_id,
+        api_abort_controller: abortController
+      };
+    }
   },
   computed: {
     listUlClass: function () {
@@ -279,37 +345,82 @@ export default Vue.extend({
       return this.loading_message_show;
     },
     filterd_list2: function (): ListItem[] {
-      const result: ListItemWithSortValue = [];
+      const result: (ListItem & { full_text_result: boolean })[] = [];
       const sortType = this.sort_model;
+      const keywordFilter = new KeywordFilter(this.filter_keyword);
+      const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
       GoogleApi.DataFilter.convertDatas(this.google_drive_api_result, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
         .forEach(a => {
-          result.push(a);
+          if (keywordFilter.isMatch(a.title) && result.every(b => b.link != a.link)) {
+            result.push(Object.assign(a, { full_text_result: false }));
+          }
         })
-      const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
       if (this.evernote_api_result != null) {
         EvernoteApi.DataFilter.convertDatas(this.evernote_api_result, sortType, this.icon_image.evernote, isMobilePhone)
           .forEach(a => {
-            result.push(a);
+            if (keywordFilter.isMatch(a.title) && result.every(b => b.link != a.link)) {
+              result.push(Object.assign(a, { full_text_result: false }));
+            }
           })
+      }
+      if (this.text_search.mode == "本文検索結果表示中") {
+        GoogleApi.DataFilter.convertDatas(this.text_search.api_result.google_drive, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
+          .forEach(a => {
+            if (result.every(b => b.link != a.link)) {
+              result.push(Object.assign(a, { full_text_result: true }));
+            }
+          })
+        if (this.text_search.api_result.evernote) {
+          EvernoteApi.DataFilter.convertDatas(this.text_search.api_result.evernote, sortType, this.icon_image.evernote, isMobilePhone)
+            .forEach(a => {
+              if (result.every(b => b.link != a.link)) {
+                result.push(Object.assign(a, { full_text_result: true }));
+              }
+            })
+        }
       }
       const sortMulti = sortType == "title" ? 1 : -1;// titleの時は昇順にソートするが、それ以外は新しい方から見たいので降順ソートにする
       result.sort((a, b) => {
         return a.sortValue.localeCompare(b.sortValue) * sortMulti;
       });
-      const keywords: string[] = this.filter_keyword.replace(/　/g, " ").trim().split(/\s+/).filter(a => a != "").map(a => a.toLowerCase());
-      if (keywords.length == 0) {
-        return result;
-      } else {
-        return result.filter(a => {
-          const name = a.title.toLowerCase();
-          return keywords.find(keyword => {
-            return name.includes(keyword);
-          }) !== undefined;
-        });
-      }
+      return result;
     }
   },
   methods: {
+    show_text_search_result: function () {
+      if (this.text_search.mode != "本文検索結果表示指示待機中") {
+        return;
+      }
+      const api_result = this.text_search.api_result;
+      this.text_search = {
+        mode: "本文検索結果表示中",
+        api_result: api_result
+      };
+    },
+    text_search_start: async function (abortSignal: AbortSignal) {
+      const googleDrivePropmise = GoogleApi.DataRequest.getDataFromApi(this.filter_keyword, this.sort_model, this.access_token, abortSignal).catch(e => {
+        if (e && e.name == "AbortError") {
+          // 握りつぶす
+          return undefined;
+        }
+        throw e;//それ以外は投げ直す
+      });
+      const evernoteApiPromise = EvernoteApi.DataRequest.loadData({
+        url: this.evernoteApiUrl,
+        developer_token: this.evernoteApiDeveloperToken,
+        words: this.filter_keyword,
+        ascending: false,
+        order: "updated",
+        abortSignal: abortSignal
+      }).catch(e => {
+        if (e && e.name == "AbortError") {
+          // 握りつぶす
+          return undefined;
+        }
+        throw e;//それ以外は投げ直す
+      });
+      return Promise.all([googleDrivePropmise, evernoteApiPromise]);
+    },
     formatDateFromString: function (dateString: string | null) {
       if (dateString == null) {
         return "";
@@ -362,7 +473,7 @@ export default Vue.extend({
       GoogleApi.DataRequest.getDataFromApi("", this.sort_model, this.access_token).then(json => {
         this.loading_message_show = false;
         save_sort_option(this.sort_model);
-        this.google_drive_api_result = json;
+        this.google_drive_api_result = json.files;
       });
     },
     save_column_option_value: function () {
