@@ -4,10 +4,10 @@
       <div
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
       >Web Documents</div>
-      <div v-show="loading_message_show" style="display: flex;align-items: center;">読込中</div>
+      <div v-show="loadingMessageShow" style="display: flex;align-items: center;">読込中</div>
       <select
-        v-model="column_style_select"
-        @change="save_column_option_value"
+        v-model="columnStyleSelect"
+        @change="saveColumnOptionValue"
         style="height: 100%;"
       >
         <option value="1">1行</option>
@@ -26,7 +26,7 @@
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
       >
         <img
-          :src="icon_image.googleDocsSpread"
+          :src="iconImage.googleDocsSpread"
           style="object-fit:contain;width:20px;height:20px;"
           title="google docs spread"
         >
@@ -36,30 +36,30 @@
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
       >
         <img
-          :src="icon_image.googleDocsDocument"
+          :src="iconImage.googleDocsDocument"
           style="object-fit:contain;width:20px;height:20px;"
           title="google docs document"
         >
       </a>
       <a
-        :href="evernote_new_link"
+        :href="evernoteNewLink"
         style="display: flex;align-items: center;border: solid 1px silver;background: buttonface;height: 100%;"
       >
         <img
-          :src="icon_image.evernote"
+          :src="iconImage.evernote"
           style="object-fit:contain;width:20px;height:20px;"
           title="evernote"
         >
       </a>
       <button
-        v-on:click="reload_data"
-        :disabled="disable_reload_select_ui"
+        v-on:click="reloadData"
+        :disabled="disableReloadSelectUi"
         style="height: 100%;"
       >再読込</button>
       <select
-        @change="reload_data()"
-        v-model="sort_model"
-        :disabled="disable_reload_select_ui"
+        @change="reloadData()"
+        v-model="sortModel"
+        :disabled="disableReloadSelectUi"
         style="height: 100%;"
       >
         <option value="last_view_me" selected>最終閲覧(自分)</option>
@@ -71,26 +71,26 @@
     </div>
     <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">検索</div>
-      <input type="search" style="flex:1 1 0;" v-model="filter_keyword" placeholder="絞り込みキーワード">
-      <div v-if="text_search.mode=='検索中'" style="flex:0 0 auto;display: flex;align-items: center;">
-        <img :src="icon_image.loading" style="width:20px;object-fit:contain;">
+      <input type="search" style="flex:1 1 0;" v-model="filterKeyword" placeholder="絞り込みキーワード">
+      <div v-if="textSearch.mode=='検索中'" style="flex:0 0 auto;display: flex;align-items: center;">
+        <img :src="iconImage.loading" style="width:20px;object-fit:contain;">
         全文検索中
       </div>
       <div
-        v-if="text_search.mode=='本文検索結果表示指示待機中'"
+        v-if="textSearch.mode=='本文検索結果表示指示待機中'"
         style="flex:0 0 auto;display: flex;align-items: center;"
       >
-        <button @click="show_text_search_result">全文検索結果表示 {{ text_search.new_items.google_drive }}個</button>
+        <button @click="showTextSearchResult">全文検索結果表示 {{ textSearch.newItems.googleDrive }}個</button>
       </div>
       <div
-        v-if="text_search.mode=='本文検索結果表示中'"
+        v-if="textSearch.mode=='本文検索結果表示中'"
         style="flex:0 0 auto;display: flex;align-items: center;"
       >全文検索結果表示中</div>
       <div v-show="false" style="flex:0 0 auto;display: flex;align-items: center;">Google全文検索エラー</div>
       <div v-show="false" style="flex:0 0 auto;display: flex;align-items: center;">Evernote全文検索エラー</div>
     </div>
     <ul
-      v-if="auth_status == '認証情報あり'"
+      v-if="authStatus == '認証情報あり'"
       class="list-ul-parent"
       :class="listUlClass"
       style="flex:1 1 0;margin-top:0;overflow-y:scroll;overscroll-behavior: contain;margin-bottom:0;"
@@ -98,7 +98,7 @@
       @wheel="listWheelEvent"
     >
       <li
-        v-for="item in filterd_list2"
+        v-for="item in filterdList"
         :key="item.link"
         :style="listLIClass"
         style="display:flex;border-bottom:solid 1px silver;"
@@ -121,10 +121,10 @@
         </a>
       </li>
     </ul>
-    <div v-else-if="auth_status == '認証情報なし'">
-      <button v-on:click="auth_start_push">認証開始</button>
+    <div v-else-if="authStatus == '認証情報なし'">
+      <button v-on:click="authStartPush">認証開始</button>
     </div>
-    <div v-else-if="auth_status == 'アクセストークン更新中'">アクセストークン更新中</div>
+    <div v-else-if="authStatus == 'アクセストークン更新中'">アクセストークン更新中</div>
   </div>
 </template>
 
@@ -169,21 +169,21 @@ export default Vue.extend({
         el.scrollTop = 0
       }
     });
-    this.sort_model = get_sort_option();
-    this.column_style_select = getColumnOptionValue();
+    this.sortModel = get_sort_option();
+    this.columnStyleSelect = getColumnOptionValue();
     const chrome拡張のapiを使う = !!this.useChromeIdentityiApi;
     const URLにcodeがある = document.location.href.match(/\?code=(.+?)&/) != null;
     if (chrome拡張のapiを使う && chrome && chrome.identity && chrome.identity.getAuthToken) {
       // まずはトークンが取得出来るかチェック
-      this.auth_status = "アクセストークン更新中";
+      this.authStatus = "アクセストークン更新中";
       chrome.identity.getAuthToken({ interactive: false }, token => {
         if (!token) {
           // トークンが取得できなかった。
-          this.auth_status = "認証情報なし";
+          this.authStatus = "認証情報なし";
         } else {
-          this.auth_status = "認証情報あり";
+          this.authStatus = "認証情報あり";
           this.access_token = token;
-          this.reload_data();
+          this.reloadData();
           EvernoteApi.DataRequest.loadData({
             url: this.evernoteApiUrl,
             developer_token: this.evernoteApiDeveloperToken,
@@ -191,16 +191,16 @@ export default Vue.extend({
             ascending: false,
             order: "updated"
           }).then(evernoteList => {
-            this.evernote_api_result = evernoteList;
+            this.evernoteApiResult = evernoteList;
           });
         }
       })
     } else if (URLにcodeがある) {
       const code = RegExp.$1;
-      this.auth_status = "アクセストークン更新中";
-      this.loading_message_show = true;
+      this.authStatus = "アクセストークン更新中";
+      this.loadingMessageShow = true;
       GoogleApi.Auth.getAccessTokenNewGet(code, this.googleApiDataRedirectUrl, this.googleApiDataClientId, this.googleApiDataClientSecret).then(a => {
-        this.loading_message_show = false;
+        this.loadingMessageShow = false;
         save_refresh_token(a.refreshToken);
         document.location.href = this.googleApiDataRedirectUrl;
       }).catch(e => {
@@ -209,10 +209,10 @@ export default Vue.extend({
         document.location.href = this.googleApiDataRedirectUrl;
       });
     } else if (get_refresh_token() != "") {
-      this.auth_status = "認証情報あり";
+      this.authStatus = "認証情報あり";
       GoogleApi.Auth.getAccessTokenRefresh(get_refresh_token(), this.googleApiDataClientId, this.googleApiDataClientSecret).then(b => {
         this.access_token = b.accessToken;
-        this.reload_data();
+        this.reloadData();
       }).catch(e => {
         alert(`コードからアクセストークンとリフレッシュトークンを取得する事に失敗しました。\n${e}`);
         save_refresh_token("");
@@ -225,10 +225,10 @@ export default Vue.extend({
         ascending: false,
         order: "updated"
       }).then(evernoteList => {
-        this.evernote_api_result = evernoteList;
+        this.evernoteApiResult = evernoteList;
       });
     } else {
-      this.auth_status = "認証情報なし";
+      this.authStatus = "認証情報なし";
     }
   },
   props: {
@@ -241,73 +241,74 @@ export default Vue.extend({
   },
   data: function () {
     return {
-      google_drive_api_result: [] as GoogleApi.DataRequest.GoogleApiFileData[],
-      evernote_api_result: null as (EvernoteApi.DataRequest.EvernoteApiData | null),
-      sort_model: "last_view_me" as SortType,
-      auth_status: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
+      googleDriveApiResult: [] as GoogleApi.DataRequest.GoogleApiFileData[],
+      evernoteApiResult: null as (EvernoteApi.DataRequest.EvernoteApiData | null),
+      sortModel: "last_view_me" as SortType,
+      authStatus: "認証情報なし" as "認証情報なし" | "アクセストークン更新中" | "認証情報あり",
       access_token: "",
-      loading_message_show: false,
-      filter_keyword: "",
-      icon_image: {
+      loadingMessageShow: false,
+      filterKeyword: "",
+      iconImage: {
         googleDocsDocument: require("./images/icon-google-docs-doc.svg"),
         googleDocsSpread: require("./images/icon-google-docs-spread.svg"),
         evernote: require("./images/icon-evernote.svg"),
         loading: require("./images/loading.svg"),
       },
-      column_style_select: "1",
-      text_search: { "mode": "検索なし" } as { "mode": "検索なし" } |
-      { "mode": "検索中", "settimeout_timer_id": number, "api_abort_controller": AbortController } |
-      { "mode": "本文検索結果表示指示待機中", api_result: { google_drive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) }, new_items: { google_drive: number, evernote: number } } |
-      { "mode": "本文検索結果表示中", api_result: { google_drive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) } }
+      columnStyleSelect: "1",
+      textSearch: { mode: "検索なし" } as { mode: "検索なし" } |
+      { mode: "検索中", settimeoutTimerId: number, apiAbortController: AbortController } |
+      { mode: "本文検索結果表示指示待機中", apiResult: { googleDrive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) }, newItems: { googleDrive: number, evernote: number } } |
+      { mode: "本文検索結果表示中", apiResult: { googleDrive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) } },
+      enable_scroll: true
     };
   },
   watch: {
-    filter_keyword: function (newVal, oldVal) {
-      if (this.text_search.mode == "検索中") {
-        clearTimeout(this.text_search.settimeout_timer_id);
-        this.text_search.api_abort_controller.abort();
-      } else if (this.text_search.mode == "本文検索結果表示指示待機中" || this.text_search.mode == "本文検索結果表示中") {
-        this.text_search.api_result.google_drive = [];
-        this.text_search.api_result.evernote = null;
+    filterKeyword: function (newVal, oldVal) {
+      if (this.textSearch.mode == "検索中") {
+        clearTimeout(this.textSearch.settimeoutTimerId);
+        this.textSearch.apiAbortController.abort();
+      } else if (this.textSearch.mode == "本文検索結果表示指示待機中" || this.textSearch.mode == "本文検索結果表示中") {
+        this.textSearch.apiResult.googleDrive = [];
+        this.textSearch.apiResult.evernote = null;
       }
       const abortController = new AbortController();
-      const settimeout_timer_id = setTimeout(() => {
-        this.text_search_start(abortController.signal).then(a => {
+      const settimeoutTimerId = setTimeout(() => {
+        this.textSearchStart(abortController.signal).then(a => {
           const gooleDriveFiles = a[0] ? a[0].files : [];
           const evernoteApiData = a[1] ? a[1] : null;
-          const currentItemUrls = this.filterd_list2.map(a => a.link);
-          const sortType = this.sort_model;
-          const googleDriveNewItemCount = GoogleApi.DataFilter.convertDatas(gooleDriveFiles, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
+          const currentItemUrls = this.filterdList.map(a => a.link);
+          const sortType = this.sortModel;
+          const googleDriveNewItemCount = GoogleApi.DataFilter.convertDatas(gooleDriveFiles, sortType, { doc: this.iconImage.googleDocsDocument, spread: this.iconImage.googleDocsSpread })
             .map(a => a.link)
             .filter(a => currentItemUrls.includes(a) == false).length;
-          const evernoteNewItemCount = (evernoteApiData ? EvernoteApi.DataFilter.convertDatas(evernoteApiData, sortType, this.icon_image.evernote, false) : [])
+          const evernoteNewItemCount = (evernoteApiData ? EvernoteApi.DataFilter.convertDatas(evernoteApiData, sortType, this.iconImage.evernote, false) : [])
             .map(a => a.link)
             .filter(a => currentItemUrls.includes(a) == false).length;
-          this.text_search = {
+          this.textSearch = {
             mode: "本文検索結果表示指示待機中",
-            api_result: {
-              google_drive: gooleDriveFiles,
+            apiResult: {
+              googleDrive: gooleDriveFiles,
               evernote: evernoteApiData
             },
-            new_items: {
-              google_drive: googleDriveNewItemCount,
+            newItems: {
+              googleDrive: googleDriveNewItemCount,
               evernote: evernoteNewItemCount
             }
           };
         })
       }, 1000);
-      this.text_search = {
+      this.textSearch = {
         mode: "検索中",
-        settimeout_timer_id,
-        api_abort_controller: abortController
+        settimeoutTimerId,
+        apiAbortController: abortController
       };
     }
   },
   computed: {
     listUlClass: function () {
-      const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
-      const yokoMatch = this.column_style_select.match(/yoko-(\d+)/);
-      if (this.column_style_select == "1") {
+      const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
+      const yokoMatch = this.columnStyleSelect.match(/yoko-(\d+)/);
+      if (this.columnStyleSelect == "1") {
         return "";
       } else if (tateMatch) {
         return ["multi-columns", "tate"];
@@ -318,9 +319,9 @@ export default Vue.extend({
       }
     },
     listLIClass: function () {
-      const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
-      const yokoMatch = this.column_style_select.match(/yoko-(\d+)/);
-      if (this.column_style_select == "1") {
+      const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
+      const yokoMatch = this.columnStyleSelect.match(/yoko-(\d+)/);
+      if (this.columnStyleSelect == "1") {
         return {}
       } else if (yokoMatch && 2 <= Number(yokoMatch[1])) {
         const p = 100 / Number(yokoMatch[1]);
@@ -333,7 +334,7 @@ export default Vue.extend({
         return {};
       }
     },
-    evernote_new_link: function () {
+    evernoteNewLink: function () {
       const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
       if (isMobilePhone) {
         return `intent://scan/#Intent;scheme=evernote;package=com.evernote;end`;
@@ -341,37 +342,37 @@ export default Vue.extend({
         return `https://www.evernote.com/client/web`;
       }
     },
-    disable_reload_select_ui: function () {
-      return this.loading_message_show;
+    disableReloadSelectUi: function () {
+      return this.loadingMessageShow;
     },
-    filterd_list2: function (): ListItem[] {
+    filterdList: function (): ListItem[] {
       const result: (ListItem & { full_text_result: boolean })[] = [];
-      const sortType = this.sort_model;
-      const keywordFilter = new KeywordFilter(this.filter_keyword);
+      const sortType = this.sortModel;
+      const keywordFilter = new KeywordFilter(this.filterKeyword);
       const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
-      GoogleApi.DataFilter.convertDatas(this.google_drive_api_result, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
+      GoogleApi.DataFilter.convertDatas(this.googleDriveApiResult, sortType, { doc: this.iconImage.googleDocsDocument, spread: this.iconImage.googleDocsSpread })
         .forEach(a => {
           if (keywordFilter.isMatch(a.title) && result.every(b => b.link != a.link)) {
             result.push(Object.assign(a, { full_text_result: false }));
           }
         })
-      if (this.evernote_api_result != null) {
-        EvernoteApi.DataFilter.convertDatas(this.evernote_api_result, sortType, this.icon_image.evernote, isMobilePhone)
+      if (this.evernoteApiResult != null) {
+        EvernoteApi.DataFilter.convertDatas(this.evernoteApiResult, sortType, this.iconImage.evernote, isMobilePhone)
           .forEach(a => {
             if (keywordFilter.isMatch(a.title) && result.every(b => b.link != a.link)) {
               result.push(Object.assign(a, { full_text_result: false }));
             }
           })
       }
-      if (this.text_search.mode == "本文検索結果表示中") {
-        GoogleApi.DataFilter.convertDatas(this.text_search.api_result.google_drive, sortType, { doc: this.icon_image.googleDocsDocument, spread: this.icon_image.googleDocsSpread })
+      if (this.textSearch.mode == "本文検索結果表示中") {
+        GoogleApi.DataFilter.convertDatas(this.textSearch.apiResult.googleDrive, sortType, { doc: this.iconImage.googleDocsDocument, spread: this.iconImage.googleDocsSpread })
           .forEach(a => {
             if (result.every(b => b.link != a.link)) {
               result.push(Object.assign(a, { full_text_result: true }));
             }
           })
-        if (this.text_search.api_result.evernote) {
-          EvernoteApi.DataFilter.convertDatas(this.text_search.api_result.evernote, sortType, this.icon_image.evernote, isMobilePhone)
+        if (this.textSearch.apiResult.evernote) {
+          EvernoteApi.DataFilter.convertDatas(this.textSearch.apiResult.evernote, sortType, this.iconImage.evernote, isMobilePhone)
             .forEach(a => {
               if (result.every(b => b.link != a.link)) {
                 result.push(Object.assign(a, { full_text_result: true }));
@@ -387,18 +388,18 @@ export default Vue.extend({
     }
   },
   methods: {
-    show_text_search_result: function () {
-      if (this.text_search.mode != "本文検索結果表示指示待機中") {
+    showTextSearchResult: function () {
+      if (this.textSearch.mode != "本文検索結果表示指示待機中") {
         return;
       }
-      const api_result = this.text_search.api_result;
-      this.text_search = {
+      const apiResult = this.textSearch.apiResult;
+      this.textSearch = {
         mode: "本文検索結果表示中",
-        api_result: api_result
+        apiResult: apiResult
       };
     },
-    text_search_start: async function (abortSignal: AbortSignal) {
-      const googleDrivePropmise = GoogleApi.DataRequest.getDataFromApi(this.filter_keyword, this.sort_model, this.access_token, abortSignal).catch(e => {
+    textSearchStart: async function (abortSignal: AbortSignal) {
+      const googleDrivePropmise = GoogleApi.DataRequest.getDataFromApi(this.filterKeyword, this.sortModel, this.access_token, abortSignal).catch(e => {
         if (e && e.name == "AbortError") {
           // 握りつぶす
           return undefined;
@@ -408,7 +409,7 @@ export default Vue.extend({
       const evernoteApiPromise = EvernoteApi.DataRequest.loadData({
         url: this.evernoteApiUrl,
         developer_token: this.evernoteApiDeveloperToken,
-        words: this.filter_keyword,
+        words: this.filterKeyword,
         ascending: false,
         order: "updated",
         abortSignal: abortSignal
@@ -443,44 +444,54 @@ export default Vue.extend({
       ];
       return dateformat(new Date(dateString), "yyyy/mm/dd(ddd)HH:MM:ss");
     },
-    auth_start_push: function () {
+    authStartPush: function () {
       const chrome拡張のapiを使う = !!this.useChromeIdentityiApi;
       if (chrome拡張のapiを使う && chrome && chrome.identity && chrome.identity.getAuthToken) {
         // まずはトークンが取得出来るかチェック
-        this.loading_message_show = true;
-        this.auth_status = "アクセストークン更新中";
+        this.loadingMessageShow = true;
+        this.authStatus = "アクセストークン更新中";
         chrome.identity.getAuthToken({ interactive: true }, token => {
-          this.loading_message_show = false;
+          this.loadingMessageShow = false;
           if (!token) {
             // トークンが取得できなかった。
-            this.auth_status = "認証情報なし";
+            this.authStatus = "認証情報なし";
           } else {
-            this.auth_status = "認証情報あり";
+            this.authStatus = "認証情報あり";
             this.access_token = token;
-            this.reload_data();
+            this.reloadData();
           }
         });
         return;
       }
-      this.loading_message_show = true;
+      this.loadingMessageShow = true;
       document.location.href = GoogleApi.Auth.getAuthStartUrl({
         クライアントID: this.googleApiDataClientId,
         リダイレクトURI: this.googleApiDataRedirectUrl
       });
     },
-    reload_data: function () {
-      this.loading_message_show = true;
-      GoogleApi.DataRequest.getDataFromApi("", this.sort_model, this.access_token).then(json => {
-        this.loading_message_show = false;
-        save_sort_option(this.sort_model);
-        this.google_drive_api_result = json.files;
+    reloadData: function () {
+      this.loadingMessageShow = true;
+      GoogleApi.DataRequest.getDataFromApi("", this.sortModel, this.access_token).then(json => {
+        this.loadingMessageShow = false;
+        save_sort_option(this.sortModel);
+        this.googleDriveApiResult = json.files;
       });
     },
-    save_column_option_value: function () {
-      setColumnOptionValue(this.column_style_select);
+    saveColumnOptionValue: function () {
+      setColumnOptionValue(this.columnStyleSelect);
+    },
+    forceScrollTop: function () {
+      const el = this.$el.querySelector("[data-is-scroll-parent]");
+      if (el) {
+        el.scrollTop = 0
+      }
     },
     listWheelEvent: function (event: WheelEvent) {
-      const tateMatch = this.column_style_select.match(/tate-(\d+)px/);
+      if (this.enable_scroll == false) {
+        event.stopPropagation();
+        return;
+      }
+      const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
       if (tateMatch) {
         const el = this.$el.querySelector<HTMLLIElement>("[data-is-scroll-parent]")!;
         el.scrollLeft += event.deltaY / 2;
