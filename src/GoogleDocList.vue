@@ -169,12 +169,6 @@ export default Vue.extend({
   components: {
   },
   mounted: function () {
-    this.$el.addEventListener("ScrollTop", () => { // emitに出来るかも
-      const el = this.$el.querySelector("[data-is-scroll-parent]");
-      if (el) {
-        el.scrollTop = 0
-      }
-    });
     this.sortModel = get_sort_option();
     this.columnStyleSelect = getColumnOptionValue();
     const chrome拡張のapiを使う = !!this.useChromeIdentityiApi;
