@@ -480,10 +480,11 @@ export default Vue.extend({
     saveColumnOptionValue: function () {
       setColumnOptionValue(this.columnStyleSelect);
     },
-    forceScrollTop: function () {
+    scrollReset: function () {
       const el = this.$el.querySelector("[data-is-scroll-parent]");
       if (el) {
-        el.scrollTop = 0
+        el.scrollTop = 0;
+        el.scrollLeft = 0;
       }
     },
     listWheelEvent: function (event: WheelEvent) {
