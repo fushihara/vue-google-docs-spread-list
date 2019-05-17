@@ -77,10 +77,16 @@
         全文検索中
       </div>
       <div
-        v-if="textSearch.mode=='本文検索結果表示指示待機中'"
+        v-if="textSearch.mode=='本文検索結果表示指示待機中' && (Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote)) != 0 "
         style="flex:0 0 auto;display: flex;align-items: center;"
       >
-        <button @click="showTextSearchResult">全文検索結果表示 {{ textSearch.newItems.googleDrive }}個</button>
+        <button @click="showTextSearchResult">全文検索結果表示 {{ Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote) }}個</button>
+      </div>
+      <div
+        v-if="textSearch.mode=='本文検索結果表示指示待機中' && (Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote)) == 0 "
+        style="flex:0 0 auto;display: flex;align-items: center;"
+      >
+      検索結果無し
       </div>
       <div
         v-if="textSearch.mode=='本文検索結果表示中'"
