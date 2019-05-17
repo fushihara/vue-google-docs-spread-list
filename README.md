@@ -89,3 +89,15 @@ https://developer.chrome.com/extensions/identity#method-getAccounts
 
 - 読み込み中svgアニメーション作成
   - https://loading.io/
+
+# todo
+
+- vueコンポーネントをtypescriptの@ を使った書き方に変える。
+- google docとevernoteを完全に同一扱いにする。
+   - 後々、pocket とか todoist も扱いたいので。
+   - 最初のgoogleAPIの認証ボタンもダサいのでなんとかする。
+- google apiのaccess tokenが切れた時に再取得する処理を入れる
+  - localStorageにリフレッシュトークンしか保存してないので、そこをなんとかする。
+- componentの名前をgoogle-doc-listから変える。もうgoogle docだけが目的ではないので。
+- apiでエラーが帰ってきた時に画面上にエラーを表示する場所を確保する。
+  - 小さい画面でも使っているので場所を悩み中。
