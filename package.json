@@ -9,9 +9,9 @@
     "build:pro-app-ts": "vue-cli-service build --target app --mode production                                                    --dest \"./build-result/pro-app-ts\"  \"./src/main.ts\"",
     "build:pro-lib-vue": "vue-cli-service build --target lib --mode production  --name GoogleDocList   --filename google-doc-list --dest \"./build-result/pro-lib-vue\" \"./src/GoogleDocList.vue\"",
     "build:pro-wc-vue": "vue-cli-service build --target wc  --mode production  --name google-doc-list                            --dest \"./build-result/pro-wc--vue\" \"./src/GoogleDocList.vue\"",
-    "build:develop":"npm run build:dev-app-ts && npm run build:dev-lib-vue && npm run build:dev-wc-vue",
-    "build:production":"npm run build:pro-app-ts && npm run build:pro-lib-vue && npm run build:pro-wc-vue",
-    "build":"npm run build:develop && npm run build:production"
+    "build:develop": "npm run build:dev-app-ts && npm run build:dev-lib-vue && npm run build:dev-wc-vue",
+    "build:production": "npm run build:pro-app-ts && npm run build:pro-lib-vue && npm run build:pro-wc-vue",
+    "build": "npm run build:develop && npm run build:production"
   },
   "dependencies": {
     "dateformat": "^3.0.3",
@@ -20,13 +20,13 @@
   "devDependencies": {
     "@types/dateformat": "^3.0.0",
     "@vue/cli-plugin-typescript": "^3.5.1",
-    "@vue/cli-service": "^3.5.1",
+    "@vue/cli-service": "^3.7.0",
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
     "stats-webpack-plugin": "^0.7.0",
     "typescript": "^3.3.4000",
     "vue-template-compiler": "^2.6.10",
-    "webpack-bundle-analyzer": "^3.1.0"
+    "webpack-bundle-analyzer": "^3.3.2"
   },
   "description": "",
   "main": "vue.config.js",
