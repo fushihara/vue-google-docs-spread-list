@@ -101,3 +101,4 @@ https://developer.chrome.com/extensions/identity#method-getAccounts
 - componentの名前をgoogle-doc-listから変える。もうgoogle docだけが目的ではないので。
 - apiでエラーが帰ってきた時に画面上にエラーを表示する場所を確保する。
   - 小さい画面でも使っているので場所を悩み中。
+- typescriptのバージョンを3.4.x に上げると壊れる https://github.com/vuejs/vue/issues/9873 ので、直るのを待つ。
