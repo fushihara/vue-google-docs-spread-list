@@ -94,7 +94,6 @@ https://developer.chrome.com/extensions/identity#method-getAccounts
 
 # todo
 
-- vueコンポーネントをtypescriptの@ を使った書き方に変える。
 - google docとevernoteを完全に同一扱いにする。
    - 後々、pocket とか todoist も扱いたいので。
    - 最初のgoogleAPIの認証ボタンもダサいのでなんとかする。
