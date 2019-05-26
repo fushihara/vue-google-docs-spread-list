@@ -115,8 +115,9 @@
           :alt="item.title"
           style="display:flex;align-items: center;width:100%;text-decoration:none;"
         >
-          <div style="flex:0 0 25px;display: flex;justify-content: center;">
+          <div style="flex:0 0 25px;display:flex;justify-content: center;position:relative;">
             <img v-bind:src="item.iconUrl" style="object-fit:contain;width:20px;height:20px;">
+            <img v-bind:src="iconImage.share" v-if="item.isShareItem" style="object-fit:contain;width:10px;height:10px;position: absolute;right:0;bottom:0;">
           </div>
           <div style="flex:1 1 0;" class="filename-parent">
             <div style="font-size:small;line-height:1.4em;">{{ item.title }}</div>
@@ -253,6 +254,7 @@ export default Vue.extend({
         googleDocsSpread: require("./images/icon-google-docs-spread.svg"),
         evernote: require("./images/icon-evernote.svg"),
         loading: require("./images/loading.svg"),
+        share: require("./images/share-alt-solid.svg"),
       },
       columnStyleSelect: "1",
       textSearch: { mode: "検索なし" } as { mode: "検索なし" } |

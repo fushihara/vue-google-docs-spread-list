@@ -66,7 +66,7 @@ export namespace GoogleApi {
   export namespace DataRequest {
     export type GoogleApiViewByMe = { viewedByMe: false } | { viewedByMe: true, viewedByMeTime: string };
     export type GoogleModifiedByMe = { modifiedByMe: false } | { modifiedByMe: true, modifiedByMeTime: string }
-    export type GoogleApiFileData = ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string } & GoogleModifiedByMe & GoogleApiViewByMe);
+    export type GoogleApiFileData = ({ id: string, name: string, mimeType: string, iconLink: string, createdTime: string, modifiedTime: string, ownedByMe: boolean } & GoogleModifiedByMe & GoogleApiViewByMe);
     export type GoogleApiData = {
       files: GoogleApiFileData[]
     };
@@ -93,7 +93,7 @@ export namespace GoogleApi {
         [
           hasFulltextSearch ? "" : ("orderBy=" + encodeURIComponent(orderBy)),
           "q=" + encodeURIComponent(qQueries.join(" and ")),
-          "fields=" + encodeURIComponent("files(kind,id,name,mimeType,iconLink,viewedByMe,viewedByMeTime,createdTime,modifiedTime,modifiedByMeTime,modifiedByMe)"),
+          "fields=" + encodeURIComponent("files(kind,id,name,mimeType,iconLink,viewedByMe,viewedByMeTime,createdTime,modifiedTime,modifiedByMeTime,modifiedByMe,ownedByMe)"),
           "pageSize=1000",
         ].join("&"),
         {
@@ -192,7 +192,8 @@ export namespace GoogleApi {
             value: timestamp,
             label: timeLabel
           },
-          sortValue: sortValue
+          sortValue: sortValue,
+          isShareItem: !a.ownedByMe
         });
       });
       return result;

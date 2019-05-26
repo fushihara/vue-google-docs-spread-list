@@ -14,5 +14,6 @@ export type ListItem = {
     value: Date,
     label: string
   },
-  sortValue: string 
+  sortValue: string,
+  isShareItem: boolean
 };

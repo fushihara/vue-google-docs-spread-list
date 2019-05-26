@@ -89,6 +89,8 @@ https://developer.chrome.com/extensions/identity#method-getAccounts
 
 - 読み込み中svgアニメーション作成
   - https://loading.io/
+- 各種アイコン
+  - https://fontawesome.com/license/free
 
 # todo
 

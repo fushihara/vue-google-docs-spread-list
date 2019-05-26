@@ -102,7 +102,8 @@ export namespace EvernoteApi {
             value: timestamp,
             label: timeLabel
           },
-          sortValue: sortValue
+          sortValue: sortValue,
+          isShareItem: false
         });
       });
       return result;
