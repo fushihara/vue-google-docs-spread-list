@@ -119,7 +119,7 @@
             <img v-bind:src="item.iconUrl" style="object-fit:contain;width:20px;height:20px;">
           </div>
           <div style="flex:1 1 0;" class="filename-parent">
-            <div style="font-size:small;">{{ item.title }}</div>
+            <div style="font-size:small;line-height:1.4em;">{{ item.title }}</div>
             <div
               style="font-size:x-small;"
             >{{item.timestamp.label}}：{{formatDateFromString(item.timestamp.value)}}</div>
