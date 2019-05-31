@@ -26,6 +26,6 @@ module.exports = {
     }
   },
   filenameHashing: true,
-  publicPath: process.env.PUBLIC_PATH ||  "/", // 通常は「/」 servの時のURLと、build app の時に使われるっぽい
+  publicPath: process.env.PUBLIC_PATH || "/", // 通常は「/」 servの時のURLと、build app の時に使われるっぽい
   outputDir: "build-result/unused" // buildの時、引数で指定されるので未使用のはず
 }
