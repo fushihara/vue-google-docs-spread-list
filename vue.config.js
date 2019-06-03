@@ -25,6 +25,28 @@ module.exports = {
       filename: "index.html",
     }
   },
+  chainWebpack: config => {
+    const svgRule = config.module.rule('svg')
+    svgRule.uses.clear();
+    svgRule
+      .use('url-loader')
+      .loader('url-loader')
+      .tap(options => {
+        // このoptionsの値はundefinedの場合がある。
+        if (!options) { options = {}; }
+        options.limit = 10 * 1024;
+        return options;
+      });
+    config.module
+      .rule('images') // ここのimages とかは、vue-cli をデバッグ実行して変数を見るのが一番早い。結構色々ある
+      .use('url-loader')
+      .loader('url-loader')
+      .tap(options => {
+        if (!options) { options = {}; }
+        options.limit = 10 * 1024;//画像に対するurl-loaderのオプションを書き換える。デフォルトは4098byte
+        return options
+      });
+  },
   filenameHashing: true,
   publicPath: process.env.PUBLIC_PATH || "/", // 通常は「/」 servの時のURLと、build app の時に使われるっぽい
   outputDir: "build-result/unused" // buildの時、引数で指定されるので未使用のはず
