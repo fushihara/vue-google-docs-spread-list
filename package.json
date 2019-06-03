@@ -1,6 +1,6 @@
 {
-  "name": "@fushihara/vuejs-google-doc-list-test-83k7ynyt",
-  "version": "1.0.2",
+  "name": "@fushihara/vuejs-google-doc-list-test-xwtw0qkn",
+  "version": "1.0.0",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build:dev-app-ts": "vue-cli-service build --target app --mode development                                                   --dest \"./build-result/dev-app-ts\"  \"./src/main.ts\"",
