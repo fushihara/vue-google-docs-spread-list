@@ -138,9 +138,9 @@
 <script lang="ts">
 import Vue from "vue";
 import dateformat from "dateformat";
-import { GoogleApi } from "./google-api"
-import { EvernoteApi } from "./evernote-api"
-import { KeywordFilter } from "./KeywordFilter"
+import { GoogleApi } from "./utils/service-apis/google-api"
+import { EvernoteApi } from "./utils/service-apis/evernote-api"
+import { KeywordFilter } from "./utils/KeywordFilter"
 import { SortType, ListItem } from './d.ts/shims-tsx';
 // localstorageに使う接頭語
 const vue_element_key = `h4hc25ub-google-document-list`;

@@ -1,4 +1,4 @@
-import GoogleDocList from "./GoogleDocList.vue";
+import GoogleDocList from "./components/OnlineDocumentList.vue";
 const v2 = new GoogleDocList<object, { set_callback: (cb: () => void) => void }>({
   propsData: {
     googleApiDataRedirectUrl: String(process.env.VUE_APP_CALLBACK_URL || ""),
