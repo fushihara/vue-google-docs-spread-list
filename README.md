@@ -1,16 +1,33 @@
-# vue google doc list
+# vue online document list
 
-GoogleDriveのdocumentとspreadsheets。それにevernoteのドキュメントを一つにまとめて一覧表示するvueコンポーネントです。
+GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるドキュメントを一覧表示＆検索をするvueコンポーネントです。
 
-GoogleDriveのドキュメント一覧はclient idとsecretを使うAPI経由での取得と、chrome.identity.getAuthToken APIを使うchrome拡張内で使う方法をサポート。
-evernoteはSDKの都合上サーバ側に設置するapiから取得します。
+![縦表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-06-06-01-30-23.png)
 
-一覧は縦表示と横表示可能。横表示の時も、マウスホイールの上下スクロールで左右へのスクロールが可能です。
+![横表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-06-06-01-30-24.png)
 
-![縦表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-05-12-00-03-18.png)
+# 特長
 
-![横表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-05-12-00-03-23.png)
+- ドキュメントの一覧は縦表示・横表示対応。
+  - 横画面の時も、PCでマウスホイールの上下移動に対応。
+- スマホ対応。
+- GoogleDriveのdocument、spreadsheet、evernoteに対応
+- 対応サービスのファイル名絞り込み＆ファイルの中身絞り込み対応
+  - 検索ボックスにテキストが入力されるとリアルタイムでファイル名で検索を行います。ファイル名検索はオンメモリで行いますので高速です。
+  - 同時に、googleDriveとevernoteのapiを使ってファイルの中身検索を行います。中身検索の結果は各サービスのapi依存です。
 
+# 制限、todo
+
+- 全ての検索にはユーザが開発者登録を行う必要がある。
+- ファイル数が大量にある場合、apiの2ページ目移行のファイルでファイル名検索が出来ない。これは改善予定。
+- evernoteの検索には別途サーバが必要。evernoteのsdkがクライアントサイドで動く事を考慮していないのと、サーバ側でapiの戻り値にAccess-Control-Allow-Originヘッダが含まれていないのでクライアントサイドだけでapiを叩くのはセキュリティ上厳しい。
+- web上でデモが行えるようにしたい。デモ用のロジックをどう書くか考え中。
+
+# 更新履歴
+バージョン表記は、メジャーバージョンが変わった時は既存の環境で破壊的変更あり、マイナーバージョンはそれ以外、パッチバージョンは未使用。という使い方。
+
+- 2019/06/06 v1.0.0
+  - npmでリリース
 
 # git cloneした後に実行出来るコマンド一覧
 
@@ -99,7 +116,6 @@ https://developer.chrome.com/extensions/identity#method-getAccounts
    - 最初のgoogleAPIの認証ボタンもダサいのでなんとかする。
 - google apiのaccess tokenが切れた時に再取得する処理を入れる
   - localStorageにリフレッシュトークンしか保存してないので、そこをなんとかする。
-- componentの名前をgoogle-doc-listから変える。もうgoogle docだけが目的ではないので。
 - apiでエラーが帰ってきた時に画面上にエラーを表示する場所を確保する。
   - 小さい画面でも使っているので場所を悩み中。
 - typescriptのバージョンを3.4.x に上げると壊れる https://github.com/vuejs/vue/issues/9873 ので、直るのを待つ。
