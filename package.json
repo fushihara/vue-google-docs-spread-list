@@ -28,9 +28,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "dateformat": "^3.0.3",
+  "peerDependencies": {
     "vue": "^2.6.10"
+  },
+  "dependencies": {
+    "dateformat": "^3.0.3"
   },
   "devDependencies": {
     "@types/dateformat": "^3.0.0",
