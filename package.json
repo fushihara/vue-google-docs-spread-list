@@ -18,11 +18,11 @@
     "build-result/dev-lib-vue/vuejs-google-doc-list.umd.js",
     "build-result/dev-lib-vue/img"
   ],
-  "mainプロパティ": "npm instalで実行するファイル。umd形式で、target libでvueファイルをビルドしたものを指定する",
+  "mainプロパティ": "npm instalで実行するファイル。umd形式で、target libでvueファイルをビルドしたものを指定する。unpkgとjsdelivrもあるが、mainと同じなので略。",
   "main": "./build-result/dev-lib-vue/vuejs-google-doc-list.umd.js",
   "licenseプロパティ": "Apache-2.0で。後で変えるかな",
   "license": "Apache-2.0",
-  "repositoryプロパティ": "xxx",
+  "repositoryプロパティ": "npm.comで表示されるレポジトリのURL",
   "repository": "github:fushihara/vue-google-docs-spread-list",
   "author": "Fushihara <test@example.com>",
   "publishConfig": {
