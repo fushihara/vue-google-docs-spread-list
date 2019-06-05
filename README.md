@@ -30,6 +30,8 @@ GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるド�
   - npmでリリース
 - 2019/06/06 v1.1.0
   - package.jsonのfilesプロパティ更新
+- 2019/06/06 v1.2.0
+  - package.jsonのmainプロパティ更新
 
 
 # git cloneした後に実行出来るコマンド一覧
