@@ -25,7 +25,7 @@
   "license": "MIT",
   "repositoryプロパティ": "npm.comで表示されるレポジトリのURL",
   "repository": "github:fushihara/vue-google-docs-spread-list",
-  "author": "Fushihara <test@example.com>",
+  "author": "Fushihara",
   "publishConfig": {
     "access": "public"
   },
