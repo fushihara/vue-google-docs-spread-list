@@ -20,7 +20,7 @@
     "build-result/dev-lib-vue/vue-online-document-list.umd.js"
   ],
   "mainプロパティ": "npm instalで実行するファイル。umd形式で、target libでvueファイルをビルドしたものを指定する。unpkgとjsdelivrもあるが、mainと同じなので略。",
-  "main": "./build-result/dev-lib-vue/vuejs-google-doc-list.umd.js",
+  "main": "build-result/dev-lib-vue/vue-online-document-list.umd.js",
   "license": "MIT",
   "repositoryプロパティ": "npm.comで表示されるレポジトリのURL",
   "repository": "github:fushihara/vue-google-docs-spread-list",
