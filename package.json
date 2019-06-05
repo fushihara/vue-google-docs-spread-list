@@ -1,6 +1,8 @@
 {
   "name": "@fushihara/vuejs-google-doc-list-test-xwtw0qkn",
   "version": "1.0.0",
+  "description": "",
+  "keywords": [],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build:dev-app-ts": "vue-cli-service build --target app --mode development                                                   --dest \"./build-result/dev-app-ts\"  \"./src/main.ts\"",
@@ -44,7 +46,5 @@
     "typescript": "^3.3.4000",
     "vue-template-compiler": "^2.6.10",
     "webpack-bundle-analyzer": "^3.3.2"
-  },
-  "description": "",
-  "keywords": []
+  }
 }
