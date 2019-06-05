@@ -28,6 +28,9 @@ GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるド�
 
 - 2019/06/06 v1.0.0
   - npmでリリース
+- 2019/06/06 v1.1.0
+  - package.jsonのfilesプロパティ更新
+
 
 # git cloneした後に実行出来るコマンド一覧
 
