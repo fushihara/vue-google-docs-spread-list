@@ -2,6 +2,8 @@
 
 GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるドキュメントを一覧表示＆検索をするvueコンポーネントです。
 
+各種サービスごとにAPIを使う準備が必要なので、このモジュールをインストールしただけでは使えません。
+
 ![縦表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-06-06-01-30-23.png)
 
 ![横表示](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-06-06-01-30-24.png)
@@ -11,10 +13,152 @@ GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるド�
 - ドキュメントの一覧は縦表示・横表示対応。
   - 横画面の時も、PCでマウスホイールの上下移動に対応。
 - スマホ対応。
-- GoogleDriveのdocument、spreadsheet、evernoteに対応
+- GoogleDriveのdocument、spreadsheet、evernoteに対応。
+  - GoogleDriveはAPI登録が必要。
+  - evernoteはapiサーバの設置が必要。
 - 対応サービスのファイル名絞り込み＆ファイルの中身絞り込み対応
   - 検索ボックスにテキストが入力されるとリアルタイムでファイル名で検索を行います。ファイル名検索はオンメモリで行いますので高速です。
   - 同時に、googleDriveとevernoteのapiを使ってファイルの中身検索を行います。中身検索の結果は各サービスのapi依存です。
+
+# 使い方
+
+## 初期化
+
+初期化の方法。最低でも、以下の手順でUIが表示される事の確認は出来る。
+
+### npm上で使う方法
+
+cliで以下を実行
+```
+> npm install @fushihara/vue-online-document-list
+```
+
+vueファイル上で以下の記述
+
+```
+// HelloWorld.vue
+<template>
+  <div style="border:solid 1px black;background:#EEE;padding:10px;">
+    <OnlineDocumentList v-bind="OnlineDocumentListData"></OnlineDocumentList>
+  </div>
+</template>
+<script lang="ts">
+import Vue from "vue";
+import OnlineDocumentList from '@fushihara/vue-online-document-list';
+export default Vue.extend({
+  mounted: function () { },
+  props: {  },
+  components: {
+    OnlineDocumentList
+  },
+  data: function () {
+    return {
+      OnlineDocumentListData: {
+         googleApiDataRedirectUrl: "http://localhost:8080/", 略
+      }
+    };
+  }
+});
+</script>
+```
+
+### html上で使う方法
+
+```
+<script src="https://unpkg.com/vue@^2.6.10" defer></script>
+<script src="https://unpkg.com/@fushihara/vue-online-document-list@^2.0.0" defer></script>
+<script>
+window.addEventListener("DOMContentLoaded",(e)=>{
+  const v = new VueOnlineDocumentList({
+    propsData:{
+      googleApiDataRedirectUrl:"http://localhost:8080/", 略
+    }
+  });
+  v.$mount("#vue-online-document-list");
+}, false);
+<div id="vue-online-document-list"></div>
+```
+
+## オプションの値
+
+定義されている全てのpropは以下の通り
+
+|propName|type|
+|-|-|
+|googleApiDataRedirectUrl|String|
+|googleApiDataClientId|String|
+|googleApiDataClientSecret|String|
+|useChromeIdentityiApi|Boolena|
+|evernoteApiUrl|String|
+|evernoteApiDeveloperToken|String|
+
+
+### Google Document spreadsheetsを使う場合
+
+Google Drive Apiを登録し、ClientIdとClientSecretを取得します。登録は https://console.developers.google.com/ から。
+
+詳しい手順は省略しますが、最終的に以下のページにあるクライアントID、クライアントシークレット、承認済みのリダイレクトURIが必要となります。
+
+![google developer console](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-06-07-20-59-10.png)
+
+その後、以下のプロパティを設定する
+
+|プロパティ名|サンプル値|
+|-|-|
+|googleApiDataRedirectUrl|http://localhost:8080/|
+|googleApiDataClientId|651111111168-ldxxxxx9h.apps.googleusercontent.com|
+|googleApiDataClientSecret|xxxxxxxxxxxxxxxxx|
+
+
+### Google Document spreadsheetsをchromeの拡張の中で使う場合
+
+Google Drive Api を使う場合は認証後に戻ってくるコールバックURLを登録する必要があるが、そのURLはhttpかhttpsしか指定できず、chrome-extensionは登録出来ないので特別な対応が必要となる。
+
+最終的には以下の内容を登録する必要がある。chromeウェブストアのURLを入れる欄があるが、chromeストアに公開していないプライベートなアプリでもアプリケーションIDを入力すれば大丈夫。
+
+![google developer console](https://github.com/fushihara/vue-google-docs-spread-list/raw/master/document/2019-06-07-21-02-19.png)
+
+ここで取得したクライアントIDをchrome拡張のmanifest.jsonの以下の所に記入する。oauth2プロパティと、permissionsプロパティの中にidentityを指定する事が大切。
+```
+// manifest.json
+{
+   "manifest_version": 2,
+   "name": "speelDial",
+   "permissions": [
+      "identity",
+      "https://www.googleapis.com/"
+   ],
+   "version": "1.0.0",
+   "oauth2": {
+      "client_id": "651111111168-ldxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx9h.apps.googleusercontent.com",
+      "scopes": [
+         "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ]
+   }
+}
+```
+その後、以下のプロパティを設定する
+
+|プロパティ名|サンプル値|
+|-|-|
+|useChromeIdentityiApi|true|
+
+
+### evernoteを使う場合
+
+evernoteのAPIはサーバ上から使われる事が前提になっているので、自分でサーバを用意する必要がある。
+サーバ側のAPIはこちら https://github.com/fushihara/evernote-booklist が必要。
+
+また、evernoteのDeveloper Tokensを取得する必要がある。これは2019/06/01 時点で自動化されておらず、サポートフォーラムで運営にDMを送ってもらう必要がある・・かも。あれこれやっているうちにいつの間にか有効になっていたので自身無い。
+最終的に`S=a99:U=012abc:E=12345abcdef:C=1234abcde:P=1ab:A=en-devtoken:V=2:H=123abc123abc123abc123abc`の様な値が取得出来るはず。
+
+その後、以下のプロパティを設定する
+
+|プロパティ名|サンプル値|
+|-|-|
+|evernoteApiUrl|http://example.com|
+|evernoteApiDeveloperToken|S=a99:U=012abc:E=12345abcdef: 略|
+
 
 # 制限、todo
 
@@ -34,7 +178,8 @@ GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるド�
   - package.jsonのmainプロパティ更新
 - 2019/06/06 v2.0.0
   - jsから使う時のクラス名を"vueOnlineDocumentList"から"VueOnlineDocumentList"に変更
-
+- 2019/06/07 v2.1.0
+  - readmeを更新
 
 # git cloneした後に実行出来るコマンド一覧
 
@@ -45,54 +190,6 @@ GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるド�
 ## プロダクション用
 /build-result/の中に各種ファイルが作成される
 - npm run build
-
-# vueコンポーネントのpropの値
-
-```
-new GoogleDocList<object, { set_callback: (cb: () => void) => void }>({
-  propsData: {
-    googleApiDataRedirectUrl:"https://example.com",//コールバックURL。認証後に戻ってくるページのアドレス。GoogleAPIのコンソールで完全一致の値を指定する必要あり。
-    googleApiDataClientId:"123456789-xxxxxxxx3sgsv73cqd4kdhuc1xhyjgum.apps.googleusercontent.com",//googldDriveApiのclientID
-    googleApiDataClientSecret: "XXXXXXzze23o08myhpdm0waw",//googleDriveApiのClientSecret
-    useChromeIdentityiApi:false,//googleDriveApiではなく、chrome.identity.getAuthToken APIを使うかどうか
-    evernoteApiUrl : "https://example.com/evernote?token=xxxxxxxxx" // evernote apiのURL
-  }
-});
-```
-
-# google apiの準備方法
-
-Google Cloud Platformからプロジェクトを登録。Google Drive APIを有効化。認証情報からOAuth 2.0 クライアント IDを指定。タイプは以下を参照。
-
-## http/httpsで始まる場所
-
-認証情報「ウェブ アプリケーション」のapiキーを作成する。クライアント IDとクライアント シークレットを得る事が出来る。
-「承認済みのリダイレクト URI」にVUE_APP_CALLBACK_URLと全く同じ値をセットする。
-
-## chrome-extensionで始まる場所
-
-認証情報「Chrome アプリ」のapiキーを作成する。アプリケーション IDを入れる欄があるが、ストアに公開していない自作のアプリでも大丈夫。
-
-# manifest.jsonの指定
-
-chrome拡張の中で使う場合には、manifest.jsonの中に以下の項目を追加する必要がある。
-
-```
-{
-   "permissions": [
-      "identity",
-      "https://www.googleapis.com/"
-   ],
-   "oauth2": {
-      "client_id": "123456789-xxxxxxxx3sgsv73cqd4kdhuc1xhyjgum.apps.googleusercontent.com",
-      "scopes": [
-         "https://www.googleapis.com/auth/drive.metadata.readonly"
-      ]
-   }
-}
-
-```
-
 
 # 参考URL一覧
 
