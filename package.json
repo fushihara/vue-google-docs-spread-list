@@ -1,6 +1,6 @@
 {
   "name": "@fushihara/vue-online-document-list",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "",
   "keywords": [],
   "scripts": {
@@ -17,7 +17,8 @@
   },
   "filesプロパティ": "npm publichで配信するファイル",
   "files": [
-    "build-result/dev-lib-vue/vue-online-document-list.umd.js"
+    "build-result/dev-lib-vue/vue-online-document-list.umd.js",
+    "build-result/dev-lib-vue/vue-online-document-list.umd.js.map"
   ],
   "mainプロパティ": "npm instalで実行するファイル。umd形式で、target libでvueファイルをビルドしたものを指定する。unpkgとjsdelivrもあるが、mainと同じなので略。",
   "main": "build-result/dev-lib-vue/vue-online-document-list.umd.js",
