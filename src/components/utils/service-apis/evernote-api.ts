@@ -91,9 +91,9 @@ export namespace EvernoteApi {
             break;
           default: return;
         }
-        const linkUrl = isMobileLink
-          ? `evernote:///view/${evernoteUserData.id}/${evernoteUserData.shardId}/${a.guid}/${a.guid}/` :
-          `https://www.evernote.com/Home.action#n=${a.guid}&s=${evernoteUserData.shardId}&ses=4&sh=2&sds=5&`;//pc版
+        const pcUrl = `https://www.evernote.com/client/web#?an=true&n=${a.guid}&s=${evernoteUserData.shardId}&`;
+        const androidUrl = `evernote:///view/${evernoteUserData.id}/${evernoteUserData.shardId}/${a.guid}/${a.guid}/`
+        const linkUrl = isMobileLink ? androidUrl : pcUrl;//pc版
         result.push({
           title: a.title,
           iconUrl: iconUrl,
