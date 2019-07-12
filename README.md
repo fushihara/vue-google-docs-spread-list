@@ -170,16 +170,19 @@ evernoteのAPIはサーバ上から使われる事が前提になっているの
 # 更新履歴
 バージョン表記は、メジャーバージョンが変わった時は既存の環境で破壊的変更あり、マイナーバージョンはそれ以外、パッチバージョンは未使用。という使い方。
 
-- 2019/06/06 v1.0.0
-  - npmでリリース
-- 2019/06/06 v1.1.0
-  - package.jsonのfilesプロパティ更新
-- 2019/06/06 v1.2.0
-  - package.jsonのmainプロパティ更新
-- 2019/06/06 v2.0.0
-  - jsから使う時のクラス名を"vueOnlineDocumentList"から"VueOnlineDocumentList"に変更
+- 2019/07/13 v2.2.0
+  - readmeの更新履歴を新しい順に変更
+  - evernoteのPCで開くURLを新しいwebクライアントに変更
 - 2019/06/07 v2.1.0
   - readmeを更新
+- 2019/06/06 v2.0.0
+  - jsから使う時のクラス名を"vueOnlineDocumentList"から"VueOnlineDocumentList"に変更
+- 2019/06/06 v1.2.0
+  - package.jsonのmainプロパティ更新
+- 2019/06/06 v1.1.0
+  - package.jsonのfilesプロパティ更新
+- 2019/06/06 v1.0.0
+  - npmでリリース
 
 # git cloneした後に実行出来るコマンド一覧
 
