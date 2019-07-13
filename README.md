@@ -1,3 +1,15 @@
+  [![NPM Version][npm-version-image]][npm-site-url]
+  [![NPM Downloads][downloads-image]][npm-site-url]
+  [![NPM Minzip Size][npm-minzip-filesize]][npm-site-url]
+  [![License][license-image]][npm-site-url]
+
+<!--URL定義一覧 -->
+[npm-site-url]: https://npmjs.org/package/@fushihara/vue-online-document-list
+[npm-version-image]: https://img.shields.io/npm/v/@fushihara/vue-online-document-list.svg
+[downloads-image]: https://img.shields.io/npm/dm/@fushihara/vue-online-document-list.svg
+[npm-minzip-filesize]: https://img.shields.io/bundlephobia/minzip/@fushihara/vue-online-document-list.svg
+[license-image]: https://img.shields.io/npm/l/@fushihara/vue-online-document-list.svg
+
 # vue online document list
 
 GoogleDriveのdocumentとspreadsheetsやevernoteといったweb上にあるドキュメントを一覧表示＆検索をするvueコンポーネントです。
