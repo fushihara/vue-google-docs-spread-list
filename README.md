@@ -2,6 +2,7 @@
   [![NPM Downloads][downloads-image]][npm-site-url]
   [![NPM Minzip Size][npm-minzip-filesize]][npm-site-url]
   [![License][license-image]][npm-site-url]
+  [![last commit date][last-commit-date-image]][npm-site-url]
 
 <!--URL定義一覧 -->
 [npm-site-url]: https://npmjs.org/package/@fushihara/vue-online-document-list
@@ -9,6 +10,7 @@
 [downloads-image]: https://img.shields.io/npm/dm/@fushihara/vue-online-document-list.svg
 [npm-minzip-filesize]: https://img.shields.io/bundlephobia/minzip/@fushihara/vue-online-document-list.svg
 [license-image]: https://img.shields.io/npm/l/@fushihara/vue-online-document-list.svg
+[last-commit-date-image]: https://img.shields.io/github/last-commit/fushihara/vue-online-document-list.svg
 
 # vue online document list
 
