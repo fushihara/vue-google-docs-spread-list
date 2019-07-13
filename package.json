@@ -24,7 +24,7 @@
   "main": "build-result/dev-lib-vue/vue-online-document-list.umd.js",
   "license": "MIT",
   "repositoryプロパティ": "npm.comで表示されるレポジトリのURL",
-  "repository": "github:fushihara/vue-google-docs-spread-list",
+  "repository": "github:fushihara/vue-online-document-list",
   "author": "Fushihara",
   "publishConfig": {
     "access": "public"
