@@ -307,7 +307,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    listUlClass: function () {
+    listUlClass: function ():string[] | string {
       const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
       const yokoMatch = this.columnStyleSelect.match(/yoko-(\d+)/);
       if (this.columnStyleSelect == "1") {
@@ -320,7 +320,7 @@ export default Vue.extend({
         return "";
       }
     },
-    listLIClass: function () {
+    listLIClass: function () :{[key : string]:unknown}{
       const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
       const yokoMatch = this.columnStyleSelect.match(/yoko-(\d+)/);
       if (this.columnStyleSelect == "1") {
@@ -336,7 +336,7 @@ export default Vue.extend({
         return {};
       }
     },
-    evernoteNewLink: function () {
+    evernoteNewLink: function () :string{
       const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
       if (isMobilePhone) {
         return `intent://scan/#Intent;scheme=evernote;package=com.evernote;end`;
@@ -344,7 +344,7 @@ export default Vue.extend({
         return `https://www.evernote.com/client/web`;
       }
     },
-    disableReloadSelectUi: function () {
+    disableReloadSelectUi: function () :boolean{
       return this.loadingMessageShow;
     },
     filterdList: function (): ListItem[] {
@@ -390,7 +390,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    showTextSearchResult: function () {
+    showTextSearchResult: function ():void{
       if (this.textSearch.mode != "本文検索結果表示指示待機中") {
         return;
       }
@@ -400,7 +400,7 @@ export default Vue.extend({
         apiResult: apiResult
       };
     },
-    textSearchStart: async function (abortSignal: AbortSignal) {
+    textSearchStart: async function (abortSignal: AbortSignal) :Promise<[GoogleApi.DataRequest.GoogleApiData | undefined,EvernoteApi.DataRequest.EvernoteApiData | null | undefined]>{
       const googleDrivePropmise = GoogleApi.DataRequest.getDataFromApi(this.filterKeyword, this.sortModel, this.access_token, abortSignal).catch(e => {
         if (e && e.name == "AbortError") {
           // 握りつぶす
