@@ -17,11 +17,10 @@
   },
   "filesプロパティ": "npm publichで配信するファイル",
   "files": [
-    "build-result/dev-lib-vue/vue-online-document-list.umd.js",
-    "build-result/dev-lib-vue/vue-online-document-list.umd.js.map"
+    "build-result/pro-lib-vue/vue-online-document-list.umd.min.js"
   ],
   "mainプロパティ": "npm instalで実行するファイル。umd形式で、target libでvueファイルをビルドしたものを指定する。unpkgとjsdelivrもあるが、mainと同じなので略。",
-  "main": "build-result/dev-lib-vue/vue-online-document-list.umd.js",
+  "main": "build-result/pro-lib-vue/vue-online-document-list.umd.min.js",
   "license": "Apache-2.0",
   "repositoryプロパティ": "npm.comで表示されるレポジトリのURL",
   "repository": "github:fushihara/vue-online-document-list",
