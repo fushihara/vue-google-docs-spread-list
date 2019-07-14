@@ -16,7 +16,7 @@ module.exports = {
     devServer: {
       clientLogLevel: 'info'
     },
-    devtool: "cheap-module-source-map", // vue-cli-service build --mode development で出力したjsでeval("ソースコード")の部分を無くす時はon
+    devtool: "inline-source-map", // vue-cli-service build --mode development で出力したjsでeval("ソースコード")の部分を無くす時はon
   },
   pages: {
     index: {
