@@ -28,7 +28,7 @@
           :src="iconImage.googleDocsSpread"
           style="object-fit:contain;width:20px;height:20px;"
           title="google docs spread"
-        >
+        />
       </a>
       <a
         href="https://docs.google.com/document/create"
@@ -38,7 +38,7 @@
           :src="iconImage.googleDocsDocument"
           style="object-fit:contain;width:20px;height:20px;"
           title="google docs document"
-        >
+        />
       </a>
       <a
         :href="evernoteNewLink"
@@ -48,13 +48,9 @@
           :src="iconImage.evernote"
           style="object-fit:contain;width:20px;height:20px;"
           title="evernote"
-        >
+        />
       </a>
-      <button
-        v-on:click="reloadData"
-        :disabled="disableReloadSelectUi"
-        style="height: 100%;"
-      >再読込</button>
+      <button v-on:click="reloadData" :disabled="disableReloadSelectUi" style="height: 100%;">再読込</button>
       <select
         @change="reloadData()"
         v-model="sortModel"
@@ -70,23 +66,23 @@
     </div>
     <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">検索</div>
-      <input type="search" style="flex:1 1 0;" v-model="filterKeyword" placeholder="絞り込みキーワード">
+      <input type="search" style="flex:1 1 0;" v-model="filterKeyword" placeholder="絞り込みキーワード" />
       <div v-if="textSearch.mode=='検索中'" style="flex:0 0 auto;display: flex;align-items: center;">
-        <img :src="iconImage.loading" style="width:20px;object-fit:contain;">
+        <img :src="iconImage.loading" style="width:20px;object-fit:contain;" />
         全文検索中
       </div>
       <div
         v-if="textSearch.mode=='本文検索結果表示指示待機中' && (Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote)) != 0 "
         style="flex:0 0 auto;display: flex;align-items: center;"
       >
-        <button @click="showTextSearchResult">全文検索結果表示 {{ Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote) }}個</button>
+        <button
+          @click="showTextSearchResult"
+        >全文検索結果表示 {{ Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote) }}個</button>
       </div>
       <div
         v-if="textSearch.mode=='本文検索結果表示指示待機中' && (Number(textSearch.newItems.googleDrive)+Number(textSearch.newItems.evernote)) == 0 "
         style="flex:0 0 auto;display: flex;align-items: center;"
-      >
-      検索結果無し
-      </div>
+      >検索結果無し</div>
       <div
         v-if="textSearch.mode=='本文検索結果表示中'"
         style="flex:0 0 auto;display: flex;align-items: center;"
@@ -115,8 +111,12 @@
           style="display:flex;align-items: center;width:100%;text-decoration:none;"
         >
           <div style="flex:0 0 25px;display:flex;justify-content: center;position:relative;">
-            <img v-bind:src="item.iconUrl" style="object-fit:contain;width:20px;height:20px;">
-            <img v-bind:src="iconImage.share" v-if="item.isShareItem" style="object-fit:contain;width:10px;height:10px;position: absolute;right:0;bottom:0;">
+            <img v-bind:src="item.iconUrl" style="object-fit:contain;width:20px;height:20px;" />
+            <img
+              v-bind:src="iconImage.share"
+              v-if="item.isShareItem"
+              style="object-fit:contain;width:10px;height:10px;position: absolute;right:0;bottom:0;"
+            />
           </div>
           <div style="flex:1 1 0;" class="filename-parent">
             <div style="font-size:small;line-height:1.4em;">{{ item.title }}</div>
@@ -306,7 +306,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    listUlClass: function ():string[] | string {
+    listUlClass: function (): string[] | string {
       const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
       const yokoMatch = this.columnStyleSelect.match(/yoko-(\d+)/);
       if (this.columnStyleSelect == "1") {
@@ -319,7 +319,7 @@ export default Vue.extend({
         return "";
       }
     },
-    listLIClass: function () :{[key : string]:unknown}{
+    listLIClass: function (): { [key: string]: unknown } {
       const tateMatch = this.columnStyleSelect.match(/tate-(\d+)px/);
       const yokoMatch = this.columnStyleSelect.match(/yoko-(\d+)/);
       if (this.columnStyleSelect == "1") {
@@ -335,7 +335,7 @@ export default Vue.extend({
         return {};
       }
     },
-    evernoteNewLink: function () :string{
+    evernoteNewLink: function (): string {
       const isMobilePhone = window.navigator.userAgent.match(/android/i) != null;
       if (isMobilePhone) {
         return `intent://scan/#Intent;scheme=evernote;package=com.evernote;end`;
@@ -343,7 +343,7 @@ export default Vue.extend({
         return `https://www.evernote.com/client/web`;
       }
     },
-    disableReloadSelectUi: function () :boolean{
+    disableReloadSelectUi: function (): boolean {
       return this.loadingMessageShow;
     },
     filterdList: function (): ListItem[] {
@@ -389,7 +389,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    showTextSearchResult: function ():void{
+    showTextSearchResult: function (): void {
       if (this.textSearch.mode != "本文検索結果表示指示待機中") {
         return;
       }
@@ -399,7 +399,7 @@ export default Vue.extend({
         apiResult: apiResult
       };
     },
-    textSearchStart: async function (abortSignal: AbortSignal) :Promise<[GoogleApi.DataRequest.GoogleApiData | undefined,EvernoteApi.DataRequest.EvernoteApiData | null | undefined]>{
+    textSearchStart: async function (abortSignal: AbortSignal): Promise<[GoogleApi.DataRequest.GoogleApiData | undefined, EvernoteApi.DataRequest.EvernoteApiData | null | undefined]> {
       const googleDrivePropmise = GoogleApi.DataRequest.getDataFromApi(this.filterKeyword, this.sortModel, this.access_token, abortSignal).catch(e => {
         if (e && e.name == "AbortError") {
           // 握りつぶす
