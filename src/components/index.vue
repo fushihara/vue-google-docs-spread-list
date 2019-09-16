@@ -63,6 +63,9 @@
         <option value="createdTime">作成日時</option>
         <option value="title">タイトル</option>
       </select>
+      <label>
+        <input type="checkbox" v-model="share_file_show" />共有
+      </label>
     </div>
     <div style="flex:0 0 auto;display:flex;background:silver;heigth:2em;">
       <div style="flex:0 0 auto;padding-left: 10px;padding-right: 6px;">検索</div>
@@ -260,6 +263,7 @@ export default Vue.extend({
       { mode: "検索中", settimeoutTimerId: number, apiAbortController: AbortController } |
       { mode: "本文検索結果表示指示待機中", apiResult: { googleDrive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) }, newItems: { googleDrive: number, evernote: number } } |
       { mode: "本文検索結果表示中", apiResult: { googleDrive: GoogleApi.DataRequest.GoogleApiFileData[], evernote: (EvernoteApi.DataRequest.EvernoteApiData | null) } },
+      share_file_show: false as boolean,
       enable_scroll: true
     };
   },
@@ -385,7 +389,13 @@ export default Vue.extend({
       result.sort((a, b) => {
         return a.sortValue.localeCompare(b.sortValue) * sortMulti;
       });
-      return result;
+      return result.filter(a => {
+        if (this.share_file_show) {
+          return true;
+        } else {
+          return a.isShareItem == false;
+        }
+      });
     }
   },
   methods: {
