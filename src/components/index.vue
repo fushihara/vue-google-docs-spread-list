@@ -4,12 +4,11 @@
       <div
         style="flex:1 1 0;align-items: center;padding-left: 10px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
       >Web Documents</div>
-      <div v-show="loadingMessageShow" style="display: flex;align-items: center;">読込中</div>
-      <select
-        v-model="columnStyleSelect"
-        @change="saveColumnOptionValue"
-        style="height: 100%;"
-      >
+      <div
+        v-show="loadingMessageShow"
+        style="display: flex;flex:1 1 0;align-items: center;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
+      >読込中</div>
+      <select v-model="columnStyleSelect" @change="saveColumnOptionValue" style="height: 100%;">
         <option value="1">1行</option>
         <option value="yoko-2">横2列</option>
         <option value="yoko-3">横3列</option>
